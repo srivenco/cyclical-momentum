@@ -22,7 +22,7 @@ from macro import load_macro_state, load_macro_history
 from signals import load_signals_history, load_signals_latest, load_warming_up
 from quality_momentum import (
     get_quality_data, refresh_quality_cache, load_quality_cache,
-    compute_ltcg_status,
+    compute_ltcg_status, compute_and_cache_watchlist, _watchlist_cache_is_fresh,
 )
 
 load_dotenv()
@@ -339,14 +339,19 @@ def get_quality_watchlist(user=Depends(get_current_user)):
 @app.post("/api/quality/refresh-cache")
 def refresh_quality(user=Depends(get_current_user)):
     """
-    Trigger a fresh Screener.in scrape for all quality universe tickers.
-    This is slow (~2 min for 90 stocks) — run it once a week via scheduler.
+    Trigger background refresh of BOTH quality data (Screener.in) AND
+    the watchlist computation (momentum + signals).
+    Runs async — returns immediately. Poll /api/quality/watchlist to see result.
     """
     import threading
     def _bg():
-        refresh_quality_cache(force=True)
+        try:
+            refresh_quality_cache(force=False)   # only re-scrapes if stale
+            compute_and_cache_watchlist()
+        except Exception as e:
+            logger.error(f"Quality refresh failed: {e}")
     threading.Thread(target=_bg, daemon=True).start()
-    return {"status": "cache refresh started — check back in ~2 minutes"}
+    return {"status": "refresh started — watchlist will update in ~2 minutes"}
 
 
 @app.get("/api/quality/ltcg/{trade_id}")

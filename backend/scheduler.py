@@ -359,8 +359,21 @@ def run_daily_job():
     warming = generate_warming_up(active_books) if active_books else []
     logger.info(f"  {len(warming)} stocks approaching trigger threshold")
 
-    # Step 4: Alerts
-    logger.info("Step 4/4 — Sending alerts")
+    # Step 4: Quality momentum watchlist refresh (if stale)
+    logger.info("Step 4/5 — Quality momentum watchlist refresh")
+    try:
+        from quality_momentum import compute_and_cache_watchlist, _watchlist_cache_is_fresh
+        if not _watchlist_cache_is_fresh():
+            logger.info("  Watchlist cache is stale — refreshing (this takes ~2 min)…")
+            compute_and_cache_watchlist()
+            logger.info("  Watchlist refresh complete")
+        else:
+            logger.info("  Watchlist cache is fresh — skipping")
+    except Exception as e:
+        logger.error(f"  Quality momentum refresh failed: {e}")
+
+    # Step 5: Alerts
+    logger.info("Step 5/5 — Sending alerts")
     settings = _load_settings()
     send_email_alert(macro_state, result.get("signals", []), settings)
     send_telegram_alert(macro_state, result.get("signals", []), warming, settings)

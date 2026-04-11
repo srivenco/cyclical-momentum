@@ -439,12 +439,8 @@ export default function QualityMomentum() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-48">
-        <div className="text-sm" style={{ color: C.muted }}>
-          Loading quality-momentum data…
-          <br />
-          <span className="text-xs mt-1 block" style={{ color: C.muted }}>
-            (Computing momentum for ~90 stocks, may take 30s)
-          </span>
+        <div className="text-sm text-center" style={{ color: C.muted }}>
+          <div className="mb-2">Loading…</div>
         </div>
       </div>
     );
@@ -463,7 +459,65 @@ export default function QualityMomentum() {
     );
   }
 
-  const { watchlist = [], signals = [], cache_fresh, cache_age, generated_at } = data || {};
+  const { watchlist = [], signals = [], cache_fresh, cache_age, generated_at, needs_refresh } = data || {};
+
+  // First-run state: no cache computed yet
+  if (needs_refresh || (!watchlist.length && !refreshing)) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-base font-bold text-white">Quality Momentum</h1>
+          <p className="text-xs mt-0.5" style={{ color: C.muted }}>
+            High-ROE compounders · 12-month momentum · LTCG efficiency
+          </p>
+        </div>
+        <div className="rounded-xl p-10 text-center"
+             style={{ backgroundColor: C.card, border: `1px solid rgba(0,180,216,0.2)` }}>
+          <div className="text-4xl mb-4">📊</div>
+          <h2 className="text-sm font-semibold text-white mb-2">
+            Watchlist not computed yet
+          </h2>
+          <p className="text-xs mb-6 max-w-sm mx-auto" style={{ color: C.muted }}>
+            Click below to build the quality-momentum watchlist. This runs a one-time
+            computation (~2 min) on the backend — downloads momentum data for ~90 stocks
+            and screens for ROE &gt;15%, D/E &lt;1. Results are cached and served instantly
+            on every load after that.
+          </p>
+          <button
+            onClick={async () => {
+              setRefreshing(true);
+              try {
+                await refreshQualityCache();
+                // Poll every 15s for up to 3 minutes
+                let attempts = 0;
+                const poll = setInterval(async () => {
+                  attempts++;
+                  const fresh = await getQualityWatchlist();
+                  if ((fresh.watchlist?.length > 0) || attempts >= 12) {
+                    clearInterval(poll);
+                    setData(fresh);
+                    setRefreshing(false);
+                  }
+                }, 15000);
+              } catch (e) {
+                setError('Refresh failed: ' + e.message);
+                setRefreshing(false);
+              }
+            }}
+            disabled={refreshing}
+            className="text-sm px-6 py-2.5 rounded-lg font-medium transition-colors"
+            style={{ backgroundColor: refreshing ? '#1E3558' : C.blue, color: '#0A1628' }}>
+            {refreshing ? '⏳ Computing watchlist… (~2 min)' : '▶ Build Quality Watchlist'}
+          </button>
+          {refreshing && (
+            <p className="text-xs mt-4" style={{ color: C.muted }}>
+              Running in background on the server. Page will update automatically when ready.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
   const signalTickers = new Set(signals.map(s => s.ticker));
 
   const SECTIONS = [

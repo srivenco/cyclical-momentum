@@ -36,9 +36,11 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-DATA_DIR   = Path(__file__).parent / "data"
-CACHE_FILE = DATA_DIR / "quality_cache.json"
-CACHE_TTL_DAYS = 7       # re-scrape Screener.in every 7 days
+DATA_DIR          = Path(__file__).parent / "data"
+CACHE_FILE        = DATA_DIR / "quality_cache.json"       # Screener.in ROE/D/E
+WATCHLIST_FILE    = DATA_DIR / "quality_watchlist.json"   # pre-computed watchlist + signals
+CACHE_TTL_DAYS    = 7    # re-scrape Screener.in every 7 days
+WATCHLIST_TTL_HRS = 23   # recompute watchlist once a day
 
 # ── Quality Filters ───────────────────────────────────────────────────────────
 MIN_ROE          = 15.0   # Return on Equity % (TTM)
@@ -494,37 +496,85 @@ def compute_ltcg_status(entry_date_str: str, entry_price: float,
     }
 
 
+# ── Watchlist Cache (pre-computed, served instantly) ─────────────────────────
+
+def _load_watchlist_cache() -> dict:
+    if WATCHLIST_FILE.exists():
+        with open(WATCHLIST_FILE) as f:
+            return json.load(f)
+    return {}
+
+
+def _save_watchlist_cache(payload: dict):
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(WATCHLIST_FILE, "w") as f:
+        json.dump(payload, f, indent=2)
+
+
+def _watchlist_cache_is_fresh() -> bool:
+    wl = _load_watchlist_cache()
+    if not wl.get("computed_at"):
+        return False
+    try:
+        computed = datetime.fromisoformat(wl["computed_at"])
+        return (datetime.utcnow() - computed).total_seconds() < WATCHLIST_TTL_HRS * 3600
+    except Exception:
+        return False
+
+
+def compute_and_cache_watchlist() -> dict:
+    """
+    Full computation: quality filter → momentum rank → vol-crossover signals.
+    Saves result to watchlist cache. Designed to run in the background / scheduler.
+    Takes ~2-3 min on Render free tier (90 yfinance downloads).
+    """
+    logger.info("Computing quality-momentum watchlist…")
+    qual_data = load_quality_cache()
+    watchlist = build_watchlist(qual_data, max_stocks=30)
+    signals   = get_buy_signals(watchlist[:20])
+
+    qual_cache = _load_cache()
+    qual_fresh = _cache_is_fresh(qual_cache)
+    qual_age   = None
+    if qual_cache.get("updated_at"):
+        try:
+            updated  = datetime.fromisoformat(qual_cache["updated_at"])
+            qual_age = (datetime.utcnow() - updated).days
+        except Exception:
+            pass
+
+    payload = {
+        "watchlist":    watchlist,
+        "signals":      signals,
+        "cache_fresh":  qual_fresh,
+        "cache_age":    qual_age,
+        "computed_at":  datetime.utcnow().isoformat(),
+        "generated_at": datetime.utcnow().isoformat() + "Z",
+    }
+    _save_watchlist_cache(payload)
+    logger.info(f"Watchlist computed: {len(watchlist)} stocks, {len(signals)} signals")
+    return payload
+
+
 # ── Main Public API ───────────────────────────────────────────────────────────
 
 def get_quality_data() -> dict:
     """
-    Returns:
-      watchlist: ranked list of quality-momentum stocks
-      signals:   watchlist members firing vol crossover today
-      cache_age: age of quality data in days
-      cache_fresh: bool
+    Returns the pre-computed watchlist + signals instantly from cache.
+    If the cache doesn't exist yet, returns an empty payload with a flag so
+    the frontend can prompt the user to trigger a refresh.
     """
-    cache     = _load_cache()
-    qual_data = cache.get("data", {})
-    is_fresh  = _cache_is_fresh(cache)
+    wl = _load_watchlist_cache()
+    if wl:
+        return wl
 
-    # If cache is stale, trigger background refresh (non-blocking)
-    # In production this runs via scheduler; here we surface the staleness flag
-    watchlist = build_watchlist(qual_data, max_stocks=30)
-    signals   = get_buy_signals(watchlist[:20])  # only check top 20 for signals
-
-    cache_age = None
-    if cache.get("updated_at"):
-        try:
-            updated  = datetime.fromisoformat(cache["updated_at"])
-            cache_age = (datetime.utcnow() - updated).days
-        except Exception:
-            pass
-
+    # No cache yet — return empty payload
     return {
-        "watchlist":   watchlist,
-        "signals":     signals,
-        "cache_fresh": is_fresh,
-        "cache_age":   cache_age,
+        "watchlist":    [],
+        "signals":      [],
+        "cache_fresh":  False,
+        "cache_age":    None,
+        "computed_at":  None,
         "generated_at": datetime.utcnow().isoformat() + "Z",
+        "needs_refresh": True,
     }
