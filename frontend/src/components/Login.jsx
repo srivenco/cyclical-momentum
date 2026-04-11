@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
 
-export default function Login() {
-  const { login, loading, error } = useAuth();
+export default function Login({ onLogin, loading, error }) {
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(password);
+    await onLogin(password);
   };
 
   return (
