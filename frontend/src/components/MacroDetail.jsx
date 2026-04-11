@@ -178,7 +178,10 @@ export default function MacroDetail() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getMacro(), getMacroHistory()])
+    Promise.all([
+      getMacro(),
+      getMacroHistory().catch(() => []),
+    ])
       .then(([m, h]) => { setMacro(m); setHistory(Array.isArray(h) ? h : []); })
       .catch(console.error)
       .finally(() => setLoading(false));

@@ -36,7 +36,10 @@ export default function EquityCurve() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([getPortfolio(), getNiftyBenchmark()])
+    Promise.all([
+      getPortfolio(),
+      getNiftyBenchmark().catch(() => []),
+    ])
       .then(([d, n]) => { setData(d); setNifty(Array.isArray(n) ? n : []); })
       .catch(console.error)
       .finally(() => setLoading(false));

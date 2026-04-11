@@ -114,7 +114,11 @@ export default function SignalFeed() {
   };
 
   useEffect(() => {
-    Promise.all([getSignalsToday(), getSignalsHistory(), getWarmingUp()])
+    Promise.all([
+      getSignalsToday(),
+      getSignalsHistory(),
+      getWarmingUp().catch(() => []),
+    ])
       .then(([t, h, w]) => {
         setToday(t);
         setHistory(Array.isArray(h) ? h : []);
