@@ -18,8 +18,8 @@ from pydantic import BaseModel
 
 from auth import (LoginRequest, TokenResponse, create_access_token,
                   get_current_user, verify_password)
-from macro import load_macro_state
-from signals import load_signals_history, load_signals_latest
+from macro import load_macro_state, load_macro_history
+from signals import load_signals_history, load_signals_latest, load_warming_up
 
 load_dotenv()
 
@@ -97,6 +97,11 @@ class ExitRequest(BaseModel):
     exit_date: Optional[str] = None
 
 
+class UpdateStopRequest(BaseModel):
+    trade_id: str
+    new_stop: float
+
+
 class SettingsRequest(BaseModel):
     capital: Optional[float] = None
     risk_pct: Optional[float] = 2.0
@@ -168,6 +173,39 @@ def get_signals_history(user=Depends(get_current_user)):
     return load_signals_history(days=365)
 
 
+@app.get("/api/signals/warming")
+def get_signals_warming(user=Depends(get_current_user)):
+    return load_warming_up()
+
+
+@app.get("/api/macro/history")
+def get_macro_history(user=Depends(get_current_user)):
+    return load_macro_history(days=365)
+
+
+@app.get("/api/nifty/benchmark")
+def get_nifty_benchmark(start_date: Optional[str] = None, user=Depends(get_current_user)):
+    """Return Nifty daily % returns from start_date to today, anchored at 0."""
+    from datetime import timedelta
+    if not start_date:
+        start_date = (date.today() - timedelta(days=365)).isoformat()
+    try:
+        df = yf.download("^NSEI", start=start_date, progress=False, auto_adjust=True)
+        if df.empty:
+            return []
+        close = df["Close"].squeeze()
+        base = float(close.iloc[0])
+        result = []
+        for dt, price in close.items():
+            result.append({
+                "date": str(dt.date()),
+                "pct": round((float(price) - base) / base * 100, 2),
+            })
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ── Portfolio ─────────────────────────────────────────────────────────────────
 @app.get("/api/portfolio")
 def get_portfolio(user=Depends(get_current_user)):
@@ -236,6 +274,21 @@ def add_trade(body: TradeRequest, user=Depends(get_current_user)):
         "created_at": datetime.utcnow().isoformat() + "Z",
     }
     portfolio["trades"].append(trade)
+    _save_portfolio(portfolio)
+    return trade
+
+
+@app.post("/api/portfolio/update-stop")
+def update_stop(body: UpdateStopRequest, user=Depends(get_current_user)):
+    portfolio = _load_portfolio()
+    trade = next((t for t in portfolio["trades"] if t["id"] == body.trade_id), None)
+    if not trade:
+        raise HTTPException(status_code=404, detail="Trade not found")
+    if trade["status"] != "open":
+        raise HTTPException(status_code=400, detail="Cannot update stop on closed trade")
+    if body.new_stop >= trade["entry_price"]:
+        raise HTTPException(status_code=400, detail="Stop must be below entry price")
+    trade["current_stop"] = body.new_stop
     _save_portfolio(portfolio)
     return trade
 

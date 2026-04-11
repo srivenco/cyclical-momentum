@@ -43,5 +43,7 @@ jobs:
           git add backend/data/macro_state.json
           git add backend/data/signals_latest.json
           git add backend/data/signals_history.json
+          git add backend/data/signals_warming.json || true
+          git add backend/data/macro_history.json || true
           git diff --staged --quiet || git commit -m "chore: daily signal scan $(date -u +'%Y-%m-%d')"
           git push

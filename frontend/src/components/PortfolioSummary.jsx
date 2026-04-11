@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getPortfolio, recordExit } from '../api';
+import { getPortfolio, recordExit, updateStop } from '../api';
 
 function SummaryCard({ label, value, color }) {
   return (
@@ -77,10 +77,70 @@ function ExitModal({ trade, onClose, onSubmit }) {
   );
 }
 
+function StopModal({ trade, onClose, onSubmit }) {
+  const [newStop, setNewStop] = useState(trade.current_stop || trade.initial_stop || '');
+  const [submitting, setSubmitting] = useState(false);
+
+  const riskPct = newStop && !isNaN(newStop)
+    ? ((Number(newStop) - trade.entry_price) / trade.entry_price * 100).toFixed(2)
+    : null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!newStop || isNaN(newStop) || Number(newStop) >= trade.entry_price) return;
+    setSubmitting(true);
+    await onSubmit(trade.id, Number(newStop));
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50"
+         style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
+         onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="w-full max-w-sm mx-4 rounded-2xl p-6"
+           style={{ backgroundColor: '#0D1F3C', border: '1px solid #1E3558' }}>
+        <h3 className="text-base font-semibold text-white mb-1">Update Trailing Stop</h3>
+        <p className="text-sm mb-4" style={{ color: '#64748b' }}>
+          {trade.ticker.replace('.NS','')} · Entry ₹{trade.entry_price} · Current stop ₹{trade.current_stop}
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: '#94a3b8' }}>New Stop Price</label>
+            <input type="number" step="0.05" value={newStop}
+                   onChange={(e) => setNewStop(e.target.value)}
+                   placeholder={`Must be below ₹${trade.entry_price}`}
+                   className="w-full px-4 py-2.5 rounded-lg text-white placeholder-gray-600 focus:outline-none"
+                   style={{ backgroundColor: '#162848', border: '1px solid #1E3558' }} autoFocus />
+            {riskPct !== null && (
+              <p className="text-xs mt-1" style={{ color: Number(riskPct) < 0 ? '#ef4444' : '#fbbf24' }}>
+                Risk from entry: {riskPct}%
+                {Number(newStop) > trade.current_stop && (
+                  <span style={{ color: '#34d399' }}> ↑ Trailing up — locking in profit</span>
+                )}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-lg text-sm font-medium"
+                    style={{ backgroundColor: '#162848', color: '#94a3b8' }}>Cancel</button>
+            <button type="submit"
+                    disabled={submitting || !newStop || Number(newStop) >= trade.entry_price}
+                    className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white"
+                    style={{ backgroundColor: (!newStop || Number(newStop) >= trade.entry_price) ? '#1E3558' : '#f59e0b' }}>
+              {submitting ? 'Saving…' : 'Update Stop'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function PortfolioSummary() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exitTrade, setExitTrade] = useState(null);
+  const [stopTrade, setStopTrade] = useState(null);
   const [toast, setToast] = useState(null);
   const [tab, setTab] = useState('open');
 
@@ -104,6 +164,17 @@ export default function PortfolioSummary() {
       await recordExit({ trade_id: tradeId, exit_price: exitPrice });
       showToast('Exit recorded');
       setExitTrade(null);
+      fetchPortfolio();
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const handleUpdateStop = async (tradeId, newStop) => {
+    try {
+      await updateStop({ trade_id: tradeId, new_stop: newStop });
+      showToast('Stop updated');
+      setStopTrade(null);
       fetchPortfolio();
     } catch (err) {
       showToast(err.message, 'error');
@@ -190,7 +261,7 @@ export default function PortfolioSummary() {
                     <th className="px-3 py-2.5 text-right font-medium">P&L%</th>
                     <th className="px-3 py-2.5 text-right font-medium">Stop</th>
                     <th className="px-3 py-2.5 text-right font-medium">Days</th>
-                    <th className="px-3 py-2.5 text-center font-medium">Action</th>
+                    <th className="px-3 py-2.5 text-center font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -213,13 +284,22 @@ export default function PortfolioSummary() {
                         <td className="px-3 py-2.5 text-right" style={{ color: '#ef4444' }}>₹{t.current_stop}</td>
                         <td className="px-3 py-2.5 text-right" style={{ color: '#94a3b8' }}>{days}</td>
                         <td className="px-3 py-2.5 text-center">
-                          <button onClick={() => setExitTrade(t)}
-                                  className="px-2.5 py-1 rounded text-xs font-medium"
-                                  style={{ backgroundColor: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}
-                                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.3)'}
-                                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.15)'}>
-                            Exit
-                          </button>
+                          <div className="flex gap-1.5 justify-center">
+                            <button onClick={() => setStopTrade(t)}
+                                    className="px-2 py-1 rounded text-xs font-medium"
+                                    style={{ backgroundColor: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(245,158,11,0.3)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(245,158,11,0.15)'}>
+                              ✏ Stop
+                            </button>
+                            <button onClick={() => setExitTrade(t)}
+                                    className="px-2 py-1 rounded text-xs font-medium"
+                                    style={{ backgroundColor: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.3)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.15)'}>
+                              Exit
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -282,11 +362,10 @@ export default function PortfolioSummary() {
       )}
 
       {exitTrade && (
-        <ExitModal
-          trade={exitTrade}
-          onClose={() => setExitTrade(null)}
-          onSubmit={handleExit}
-        />
+        <ExitModal trade={exitTrade} onClose={() => setExitTrade(null)} onSubmit={handleExit} />
+      )}
+      {stopTrade && (
+        <StopModal trade={stopTrade} onClose={() => setStopTrade(null)} onSubmit={handleUpdateStop} />
       )}
     </div>
   );

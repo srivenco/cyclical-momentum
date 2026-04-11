@@ -1,5 +1,80 @@
 import { useState, useEffect } from 'react';
-import { getMacro } from '../api';
+import { getMacro, getMacroHistory } from '../api';
+
+const BOOK_COLORS_H = {
+  F2_COMMODITY: '#F4C430', F3B_RATEHIKE: '#fb923c',
+  F_RATECUT: '#22d3ee',   F4_DEFENSIVE: '#34d399',
+};
+const BOOK_LABELS_H = {
+  F2_COMMODITY: 'Commodity', F3B_RATEHIKE: 'Rate Hike',
+  F_RATECUT: 'Rate Cut',    F4_DEFENSIVE: 'Defensive',
+};
+
+function RegimeTimeline({ history }) {
+  if (!history || history.length === 0) {
+    return (
+      <p className="text-xs text-center py-4" style={{ color: '#475569' }}>
+        Regime history will build up as the daily scan runs each weekday.
+      </p>
+    );
+  }
+
+  // Find regime change events
+  const events = [];
+  for (let i = 0; i < history.length; i++) {
+    const cur = history[i];
+    const prev = history[i - 1];
+    if (i === 0) {
+      events.push({ date: cur.date, type: 'start', books: cur.active_books, entry: cur });
+      continue;
+    }
+    const curBooks = JSON.stringify([...cur.active_books].sort());
+    const prevBooks = JSON.stringify([...prev.active_books].sort());
+    if (curBooks !== prevBooks) {
+      events.push({ date: cur.date, type: 'change', books: cur.active_books, prev_books: prev.active_books, entry: cur });
+    }
+  }
+  // Always show the latest state
+  const latest = history[history.length - 1];
+  if (events.length === 0 || events[events.length - 1].date !== latest.date) {
+    events.push({ date: latest.date, type: 'current', books: latest.active_books, entry: latest });
+  }
+  events.reverse(); // newest first
+
+  return (
+    <div className="space-y-2">
+      {events.slice(0, 12).map((ev, i) => (
+        <div key={ev.date} className="flex gap-3 items-start">
+          <div className="flex flex-col items-center shrink-0 mt-1">
+            <div className="w-2 h-2 rounded-full"
+                 style={{ backgroundColor: i === 0 ? '#00B4D8' : '#334155' }} />
+            {i < events.length - 1 && <div className="w-px flex-1 mt-1" style={{ backgroundColor: '#1E3558', minHeight: 20 }} />}
+          </div>
+          <div className="pb-3">
+            <p className="text-xs font-medium" style={{ color: i === 0 ? '#00B4D8' : '#64748b' }}>{ev.date}</p>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {ev.books.length === 0 ? (
+                <span className="text-xs" style={{ color: '#475569' }}>No books active — cash</span>
+              ) : ev.books.map(b => (
+                <span key={b} className="text-xs px-2 py-0.5 rounded-full"
+                      style={{ backgroundColor: `${BOOK_COLORS_H[b]}22`, color: BOOK_COLORS_H[b] || '#94a3b8',
+                               border: `1px solid ${BOOK_COLORS_H[b] || '#334155'}44` }}>
+                  {BOOK_LABELS_H[b] || b}
+                </span>
+              ))}
+            </div>
+            {ev.entry && (
+              <p className="text-xs mt-1" style={{ color: '#475569' }}>
+                Nifty {ev.entry.nifty_regime} ({ev.entry.nifty_vs_200ma > 0 ? '+' : ''}{ev.entry.nifty_vs_200ma?.toFixed(1)}%) ·
+                Rates {ev.entry.rate_regime} · ₹{ev.entry.nifty_price?.toLocaleString('en-IN')}
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // ── Stat card ─────────────────────────────────────────────────────────────────
 function StatCard({ label, primary, secondary, sub, color, badge }) {
@@ -99,10 +174,14 @@ function buildNarrative(m) {
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function MacroDetail() {
   const [macro, setMacro] = useState(null);
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getMacro().then(setMacro).catch(console.error).finally(() => setLoading(false));
+    Promise.all([getMacro(), getMacroHistory()])
+      .then(([m, h]) => { setMacro(m); setHistory(Array.isArray(h) ? h : []); })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -276,6 +355,14 @@ export default function MacroDetail() {
         {narrative?.map((line, i) => (
           <p key={i} className="text-sm leading-relaxed" style={{ color: '#cbd5e1' }}>{line}</p>
         ))}
+      </div>
+
+      {/* Regime history timeline */}
+      <div className="rounded-xl p-5" style={{ backgroundColor: '#0D1F3C', border: '1px solid #1E3558' }}>
+        <h3 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: '#00B4D8' }}>
+          Regime Change History
+        </h3>
+        <RegimeTimeline history={history} />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getSignalsToday, getSignalsHistory, addTrade } from '../api';
+import { getSignalsToday, getSignalsHistory, addTrade, getWarmingUp } from '../api';
 import { useCapital } from '../hooks/useCapital';
 
 const BOOK_STYLES = {
@@ -68,9 +68,41 @@ function TradeModal({ signal, suggestedQty, onClose, onSubmit }) {
   );
 }
 
+const BOOK_COLORS_MAP = {
+  F2_COMMODITY: '#F4C430', F3B_RATEHIKE: '#fb923c',
+  F_RATECUT: '#22d3ee',   F4_DEFENSIVE: '#34d399',
+};
+
+function WarmingUpCard({ w }) {
+  const color = BOOK_COLORS_MAP[w.book] || '#64748b';
+  const pct = w.pct_to_trigger;
+  return (
+    <div className="rounded-xl p-3" style={{ backgroundColor: '#0D1F3C', border: '1px solid #1E3558' }}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-white">{w.ticker.replace('.NS','')}</span>
+          <span className="text-xs px-1.5 py-0.5 rounded"
+                style={{ backgroundColor: `${color}22`, color, border: `1px solid ${color}44` }}>
+            {BOOK_LABELS[w.book] || w.book}
+          </span>
+        </div>
+        <span className="text-xs font-bold" style={{ color }}>{pct}%</span>
+      </div>
+      <div className="w-full h-1.5 rounded-full mb-2" style={{ backgroundColor: '#162848' }}>
+        <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
+      </div>
+      <div className="flex justify-between text-xs" style={{ color: '#475569' }}>
+        <span>Vol {w.vol_ratio}× / {w.threshold}× needed</span>
+        <span style={{ color: '#34d399' }}>+{w.prior_20d_return}% 20d</span>
+      </div>
+    </div>
+  );
+}
+
 export default function SignalFeed() {
   const [today, setToday] = useState(null);
   const [history, setHistory] = useState([]);
+  const [warming, setWarming] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalSignal, setModalSignal] = useState(null);
   const [toast, setToast] = useState(null);
@@ -82,8 +114,12 @@ export default function SignalFeed() {
   };
 
   useEffect(() => {
-    Promise.all([getSignalsToday(), getSignalsHistory()])
-      .then(([t, h]) => { setToday(t); setHistory(Array.isArray(h) ? h : []); })
+    Promise.all([getSignalsToday(), getSignalsHistory(), getWarmingUp()])
+      .then(([t, h, w]) => {
+        setToday(t);
+        setHistory(Array.isArray(h) ? h : []);
+        setWarming(Array.isArray(w) ? w : []);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -169,6 +205,23 @@ export default function SignalFeed() {
                        showAction calcPositionSize={calcPositionSize} />
         )}
       </section>
+
+      {/* Warming up watchlist */}
+      {warming.length > 0 && (
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="text-sm font-semibold text-white">Watch List</h2>
+            <span className="text-xs px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: 'rgba(251,191,36,0.15)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.3)' }}>
+              {warming.length} approaching
+            </span>
+            <span className="text-xs" style={{ color: '#475569' }}>— stocks nearing vol crossover</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {warming.slice(0, 9).map(w => <WarmingUpCard key={`${w.ticker}-${w.book}`} w={w} />)}
+          </div>
+        </section>
+      )}
 
       {/* Past week */}
       {recentDates.map(date => (

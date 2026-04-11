@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).parent / "data"
 MACRO_FILE = DATA_DIR / "macro_state.json"
+MACRO_HISTORY_FILE = DATA_DIR / "macro_history.json"
 
 # ── Tickers ──────────────────────────────────────────────────────────────────
 NIFTY_TICKER = "^NSEI"
@@ -181,8 +182,57 @@ def detect_regime() -> dict:
     with open(MACRO_FILE, "w") as f:
         json.dump(state, f, indent=2)
 
+    # Append to history (one entry per date)
+    _append_macro_history(state)
+
     logger.info(f"Macro state saved: {state['active_books']}")
     return state
+
+
+def _append_macro_history(state: dict):
+    """Append today's regime snapshot to macro_history.json (one record per date)."""
+    history = []
+    if MACRO_HISTORY_FILE.exists():
+        try:
+            with open(MACRO_HISTORY_FILE) as f:
+                history = json.load(f)
+        except Exception:
+            history = []
+
+    # Update or insert today's record
+    today = state.get("date", date.today().isoformat())
+    existing = next((i for i, h in enumerate(history) if h.get("date") == today), None)
+    record = {
+        "date": today,
+        "active_books": state.get("active_books", []),
+        "nifty_regime": state.get("nifty_regime"),
+        "rate_regime": state.get("rate_regime"),
+        "commodity_bull": state.get("commodity_bull", False),
+        "nifty_vs_200ma": state.get("nifty_vs_200ma"),
+        "nifty_price": state.get("nifty_price"),
+        "us10y": state.get("us10y"),
+        "us10y_63d_change": state.get("us10y_63d_change"),
+        "crude_price": state.get("crude_price"),
+        "copper_price": state.get("copper_price"),
+    }
+    if existing is not None:
+        history[existing] = record
+    else:
+        history.append(record)
+
+    history.sort(key=lambda x: x.get("date", ""))
+    with open(MACRO_HISTORY_FILE, "w") as f:
+        json.dump(history, f, indent=2)
+
+
+def load_macro_history(days: int = 180) -> list:
+    if not MACRO_HISTORY_FILE.exists():
+        return []
+    with open(MACRO_HISTORY_FILE) as f:
+        history = json.load(f)
+    from datetime import timedelta
+    cutoff = (date.today() - timedelta(days=days)).isoformat()
+    return [h for h in history if h.get("date", "") >= cutoff]
 
 
 def load_macro_state() -> dict:

@@ -289,6 +289,94 @@ def load_signals_latest() -> dict:
     }
 
 
+SIGNALS_WARMING_FILE = DATA_DIR / "signals_warming.json"
+
+
+def generate_warming_up(active_books: list) -> list:
+    """
+    Return stocks approaching a vol-ratio crossover (60–95% of threshold).
+    Also checks price > MA50 and 20d momentum > 3%.
+    Results saved to signals_warming.json for API consumption.
+    """
+    today = date.today()
+    if today.month in SEASONAL_EXCLUDE_MONTHS:
+        return []
+
+    warming = []
+
+    for book_name in active_books:
+        if book_name not in BOOK_MAP:
+            continue
+        universe, threshold = BOOK_MAP[book_name]
+        low_band  = threshold * 0.60
+        high_band = threshold * 1.00   # below this = not yet triggered
+
+        for sector, tickers in universe.items():
+            for ticker in tickers:
+                try:
+                    df = yf.download(ticker, period="200d", progress=False, auto_adjust=True)
+                except Exception:
+                    continue
+                if df.empty or len(df) < 100:
+                    continue
+
+                close  = df["Close"].squeeze()
+                volume = df["Volume"].squeeze()
+
+                vol_10 = volume.rolling(10).mean()
+                vol_91 = volume.rolling(91).mean().replace(0, np.nan)
+                vr = (vol_10 / vol_91)
+                if len(vr) < 1 or pd.isna(vr.iloc[-1]):
+                    continue
+
+                vr_now = float(vr.iloc[-1])
+                # Already triggered or too far away
+                if vr_now >= high_band or vr_now < low_band:
+                    continue
+
+                # MA50 filter — price must be above (trend healthy)
+                ma50 = close.rolling(MA_FILTER).mean()
+                if len(ma50) < MA_FILTER or float(close.iloc[-1]) <= float(ma50.iloc[-1]):
+                    continue
+
+                # Momentum: > 3% over 20 days
+                if len(close) < 21:
+                    continue
+                ret20 = (float(close.iloc[-1]) - float(close.iloc[-21])) / float(close.iloc[-21])
+                if ret20 < 0.03:
+                    continue
+
+                pct_to_trigger = round(vr_now / threshold * 100, 1)
+
+                warming.append({
+                    "ticker": ticker,
+                    "book": book_name,
+                    "sector": sector,
+                    "vol_ratio": round(vr_now, 2),
+                    "threshold": threshold,
+                    "pct_to_trigger": pct_to_trigger,
+                    "prior_20d_return": round(ret20 * 100, 2),
+                    "price": round(float(close.iloc[-1]), 2),
+                    "date": today.isoformat(),
+                })
+
+    # Sort by proximity to trigger
+    warming.sort(key=lambda x: x["pct_to_trigger"], reverse=True)
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(SIGNALS_WARMING_FILE, "w") as f:
+        json.dump(warming, f, indent=2)
+
+    return warming
+
+
+def load_warming_up() -> list:
+    if SIGNALS_WARMING_FILE.exists():
+        with open(SIGNALS_WARMING_FILE) as f:
+            return json.load(f)
+    return []
+
+
 def load_signals_history(days: int = 90) -> list:
     history = _load_history()
     cutoff = date.today().isoformat()

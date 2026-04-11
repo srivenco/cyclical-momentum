@@ -8,12 +8,11 @@ import json
 import logging
 import math
 import os
-import smtplib
 import sys
 from datetime import datetime
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from pathlib import Path
+
+import httpx
 
 logging.basicConfig(
     level=logging.INFO,
@@ -220,14 +219,13 @@ def _build_email_html(macro: dict, signals: list, settings: dict) -> str:
 
 def send_email_alert(macro: dict, signals: list, settings: dict):
     alert_email = settings.get("alert_email")
-    zoho_user = os.getenv("ZOHO_USER")          # prajit@sriven.co
-    zoho_password = os.getenv("ZOHO_PASSWORD")  # Zoho app-specific password
+    resend_api_key = os.getenv("RESEND_API_KEY")
 
     if not alert_email:
         logger.info("No alert_email configured — skipping email")
         return
-    if not zoho_user or not zoho_password:
-        logger.warning("ZOHO_USER or ZOHO_PASSWORD not set — skipping email")
+    if not resend_api_key:
+        logger.warning("RESEND_API_KEY not set — skipping email")
         return
 
     date_str = macro.get("date", datetime.utcnow().date().isoformat())
@@ -240,19 +238,93 @@ def send_email_alert(macro: dict, signals: list, settings: dict):
 
     html_body = _build_email_html(macro, signals, settings)
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"] = f"SrivenCap Alerts <{zoho_user}>"
-    msg["To"] = alert_email
-    msg.attach(MIMEText(html_body, "html"))
-
     try:
-        with smtplib.SMTP_SSL("smtp.zoho.in", 465) as server:
-            server.login(zoho_user, zoho_password)
-            server.sendmail(zoho_user, alert_email, msg.as_string())
-        logger.info(f"Email alert sent to {alert_email}")
+        response = httpx.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {resend_api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": "SrivenCap Alerts <alerts@sriven.co>",
+                "to": [alert_email],
+                "subject": subject,
+                "html": html_body,
+            },
+            timeout=30,
+        )
+        if response.status_code == 200:
+            logger.info(f"Email alert sent to {alert_email}")
+        else:
+            logger.error(f"Resend error {response.status_code}: {response.text}")
     except Exception as e:
         logger.error(f"Failed to send email: {e}")
+
+
+def send_telegram_alert(macro: dict, signals: list, warming: list, settings: dict):
+    """Send a concise Telegram message with today's signals and watchlist."""
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
+    chat_id   = os.getenv("TELEGRAM_CHAT_ID", "")
+    if not bot_token or not chat_id:
+        logger.info("TELEGRAM_BOT_TOKEN/CHAT_ID not set — skipping Telegram")
+        return
+
+    date_str  = macro.get("date", datetime.utcnow().date().isoformat())
+    capital   = settings.get("capital")
+    risk_pct  = settings.get("risk_pct", 2.0)
+
+    # Header
+    lines = [
+        f"<b>📊 Cyclical Momentum — {date_str}</b>",
+        f"Nifty: <b>{macro.get('nifty_regime','—')}</b> ({macro.get('nifty_vs_200ma',0):+.2f}%)  |  "
+        f"Rates: <b>{macro.get('rate_regime','—')}</b>  |  "
+        f"Commodity: <b>{'BULL' if macro.get('commodity_bull') else 'OFF'}</b>",
+        f"Active: {', '.join(BOOK_LABELS.get(b,b) for b in macro.get('active_books', [])) or 'None'}",
+        "",
+    ]
+
+    # Signals
+    if signals:
+        lines.append(f"<b>🚨 {len(signals)} Signal{'s' if len(signals)>1 else ''}</b>")
+        for s in signals:
+            pos = _calc_position_size(capital, risk_pct, s["entry_price"], s["stop_pct"])
+            qty_str = f" → {pos['qty']} shares" if pos else ""
+            lines.append(
+                f"  • <b>{s['ticker'].replace('.NS','')}</b> [{BOOK_LABELS.get(s['book'],s['book'])}] "
+                f"Entry ₹{s['entry_price']} | Stop ₹{s['initial_stop']} ({s['stop_pct']}%)"
+                f"{qty_str} | {s['signal_strength']}"
+            )
+    else:
+        lines.append("✅ No signals today — strategy in cash")
+
+    # Warming up
+    if warming:
+        lines.append("")
+        lines.append(f"<b>👀 Watch List ({len(warming)} approaching)</b>")
+        for w in warming[:5]:   # top 5
+            lines.append(
+                f"  • <b>{w['ticker'].replace('.NS','')}</b> vol {w['vol_ratio']}x / {w['threshold']}x "
+                f"({w['pct_to_trigger']}%) | +{w['prior_20d_return']}% 20d"
+            )
+
+    lines.append("")
+    lines.append('<a href="https://srivenco.github.io/cyclical-momentum/">Open Dashboard</a>')
+
+    message = "\n".join(lines)
+
+    try:
+        resp = httpx.post(
+            f"https://api.telegram.org/bot{bot_token}/sendMessage",
+            json={"chat_id": chat_id, "text": message, "parse_mode": "HTML",
+                  "disable_web_page_preview": True},
+            timeout=15,
+        )
+        if resp.status_code == 200:
+            logger.info(f"Telegram alert sent to chat {chat_id}")
+        else:
+            logger.error(f"Telegram error {resp.status_code}: {resp.text}")
+    except Exception as e:
+        logger.error(f"Failed to send Telegram: {e}")
 
 
 def run_daily_job():
@@ -261,7 +333,7 @@ def run_daily_job():
     logger.info("=" * 60)
 
     # Step 1: Macro regime
-    logger.info("Step 1/3 — Macro regime detection")
+    logger.info("Step 1/4 — Macro regime detection")
     from macro import detect_regime
     macro_state = detect_regime()
     logger.info(f"  Active books: {macro_state['active_books']}")
@@ -269,8 +341,8 @@ def run_daily_job():
     logger.info(f"  Rate regime:  {macro_state['rate_regime']}")
 
     # Step 2: Signals
-    logger.info("Step 2/3 — Signal generation")
-    from signals import generate_signals
+    logger.info("Step 2/4 — Signal generation")
+    from signals import generate_signals, generate_warming_up
     active_books = macro_state.get("active_books", [])
     if not active_books:
         logger.info("  No active books — skipping signal scan")
@@ -282,10 +354,16 @@ def run_daily_job():
     for sig in result.get("signals", []):
         logger.info(f"  SIGNAL: {sig['ticker']} | {sig['book']} | entry={sig['entry_price']} stop={sig['initial_stop']}")
 
-    # Step 3: Email alert
-    logger.info("Step 3/3 — Sending email alert")
+    # Step 3: Warming up watchlist
+    logger.info("Step 3/4 — Warming up scan")
+    warming = generate_warming_up(active_books) if active_books else []
+    logger.info(f"  {len(warming)} stocks approaching trigger threshold")
+
+    # Step 4: Alerts
+    logger.info("Step 4/4 — Sending alerts")
     settings = _load_settings()
     send_email_alert(macro_state, result.get("signals", []), settings)
+    send_telegram_alert(macro_state, result.get("signals", []), warming, settings)
 
     logger.info(f"Done at {datetime.utcnow().isoformat()}Z")
     logger.info("=" * 60)

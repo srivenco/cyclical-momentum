@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import MacroRegime from './MacroRegime';
 import SignalFeed from './SignalFeed';
 import PortfolioSummary from './PortfolioSummary';
@@ -7,7 +8,28 @@ import MacroDetail from './MacroDetail';
 import SignalHistory from './SignalHistory';
 import CapitalSettings from './CapitalSettings';
 import { useCapital } from '../hooks/useCapital';
-import { getMacro } from '../api';
+import { getPortfolio } from '../api';
+
+function useRiskMeter() {
+  const [risk, setRisk] = useState({ totalRisk: 0, pct: 0, openCount: 0 });
+  const { capital } = useCapital();
+
+  useEffect(() => {
+    getPortfolio()
+      .then(data => {
+        const open = (data?.trades || []).filter(t => t.status === 'open');
+        const totalRisk = open.reduce((sum, t) => {
+          const stop = t.current_stop || t.initial_stop;
+          return sum + Math.abs(t.entry_price - stop) * t.quantity;
+        }, 0);
+        const pct = capital.total ? (totalRisk / capital.total) * 100 : 0;
+        setRisk({ totalRisk: Math.round(totalRisk), pct: parseFloat(pct.toFixed(1)), openCount: open.length });
+      })
+      .catch(() => {});
+  }, [capital.total]);
+
+  return risk;
+}
 
 const TABS = [
   { id: 'signals',     label: 'Signals' },
@@ -21,6 +43,7 @@ export default function Dashboard({ onLogout }) {
   const [activeTab, setActiveTab] = useState('signals');
   const [showCapital, setShowCapital] = useState(false);
   const { capital } = useCapital();
+  const riskMeter = useRiskMeter();
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#0A1628' }}>
@@ -55,6 +78,22 @@ export default function Dashboard({ onLogout }) {
               ? `₹${(capital.total / 100000).toFixed(1)}L · ${capital.riskPct}% risk`
               : 'Set Capital'}
           </button>
+
+          {/* Risk meter */}
+          {riskMeter.openCount > 0 && (
+            <div className="text-xs px-3 py-1.5 rounded flex items-center gap-1.5"
+                 style={{
+                   backgroundColor: riskMeter.pct > 6 ? 'rgba(239,68,68,0.1)' : 'rgba(52,211,153,0.08)',
+                   color: riskMeter.pct > 6 ? '#ef4444' : '#34d399',
+                   border: `1px solid ${riskMeter.pct > 6 ? 'rgba(239,68,68,0.3)' : 'rgba(52,211,153,0.2)'}`,
+                 }}>
+              <svg viewBox="0 0 24 24" className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              ₹{riskMeter.totalRisk.toLocaleString('en-IN')} at risk
+              {capital.total ? ` · ${riskMeter.pct}%` : ''}
+            </div>
+          )}
 
           <button onClick={onLogout}
                   className="text-xs px-3 py-1.5 rounded transition-colors"

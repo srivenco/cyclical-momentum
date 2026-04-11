@@ -53,3 +53,20 @@ export const recordExit = (data) =>
 
 export const getHealth = () =>
   fetch(`${BASE_URL}/api/health`).then(handleResponse);
+
+export const getWarmingUp = () =>
+  fetch(`${BASE_URL}/api/signals/warming`, { headers: getHeaders() }).then(handleResponse);
+
+export const updateStop = (data) =>
+  fetch(`${BASE_URL}/api/portfolio/update-stop`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  }).then(handleResponse);
+
+export const getMacroHistory = () =>
+  fetch(`${BASE_URL}/api/macro/history`, { headers: getHeaders() }).then(handleResponse);
+
+export const getNiftyBenchmark = (startDate) =>
+  fetch(`${BASE_URL}/api/nifty/benchmark${startDate ? `?start_date=${startDate}` : ''}`,
+    { headers: getHeaders() }).then(handleResponse);
