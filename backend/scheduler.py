@@ -220,14 +220,14 @@ def _build_email_html(macro: dict, signals: list, settings: dict) -> str:
 
 def send_email_alert(macro: dict, signals: list, settings: dict):
     alert_email = settings.get("alert_email")
-    gmail_user = os.getenv("GMAIL_USER")
-    gmail_app_password = os.getenv("GMAIL_APP_PASSWORD")
+    zoho_user = os.getenv("ZOHO_USER")          # prajit@sriven.co
+    zoho_password = os.getenv("ZOHO_PASSWORD")  # Zoho app-specific password
 
     if not alert_email:
         logger.info("No alert_email configured — skipping email")
         return
-    if not gmail_user or not gmail_app_password:
-        logger.warning("GMAIL_USER or GMAIL_APP_PASSWORD not set — skipping email")
+    if not zoho_user or not zoho_password:
+        logger.warning("ZOHO_USER or ZOHO_PASSWORD not set — skipping email")
         return
 
     date_str = macro.get("date", datetime.utcnow().date().isoformat())
@@ -242,14 +242,14 @@ def send_email_alert(macro: dict, signals: list, settings: dict):
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"] = gmail_user
+    msg["From"] = f"SrivenCap Alerts <{zoho_user}>"
     msg["To"] = alert_email
     msg.attach(MIMEText(html_body, "html"))
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(gmail_user, gmail_app_password)
-            server.sendmail(gmail_user, alert_email, msg.as_string())
+        with smtplib.SMTP_SSL("smtp.zoho.in", 465) as server:
+            server.login(zoho_user, zoho_password)
+            server.sendmail(zoho_user, alert_email, msg.as_string())
         logger.info(f"Email alert sent to {alert_email}")
     except Exception as e:
         logger.error(f"Failed to send email: {e}")
