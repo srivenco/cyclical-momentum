@@ -20,6 +20,7 @@ from auth import (LoginRequest, TokenResponse, create_access_token,
                   get_current_user, verify_password)
 from macro import load_macro_state, load_macro_history
 from signals import load_signals_history, load_signals_latest, load_warming_up
+from macro_dashboard import fetch_dashboard_data
 from quality_momentum import (
     get_quality_data, refresh_quality_cache, load_quality_cache,
     compute_ltcg_status, compute_and_cache_watchlist, _watchlist_cache_is_fresh,
@@ -323,6 +324,17 @@ def record_exit(body: ExitRequest, user=Depends(get_current_user)):
     _mark_history_exit(trade)
 
     return trade
+
+
+# ── Macro Dashboard ───────────────────────────────────────────────────────────
+
+@app.get("/api/macro/dashboard")
+def get_macro_dashboard(refresh: bool = False, user=Depends(get_current_user)):
+    """
+    Returns full macro/commodity/sector dashboard data.
+    Cached 15 minutes. Pass ?refresh=true to force a fresh fetch.
+    """
+    return fetch_dashboard_data(force=refresh)
 
 
 # ── Quality Momentum ─────────────────────────────────────────────────────────

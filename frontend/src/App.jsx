@@ -1,6 +1,6 @@
 import { useAuth } from './hooks/useAuth';
 import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import MacroDashboard from './components/MacroDashboard';
 
 export default function App() {
   const { isAuthenticated, login, logout, loading, error } = useAuth();
@@ -9,5 +9,5 @@ export default function App() {
     return <Login onLogin={login} loading={loading} error={error} />;
   }
 
-  return <Dashboard onLogout={logout} />;
+  return <MacroDashboard onLogout={logout} />;
 }
