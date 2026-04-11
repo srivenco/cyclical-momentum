@@ -165,7 +165,7 @@ def get_signals_today(user=Depends(get_current_user)):
 
 @app.get("/api/signals/history")
 def get_signals_history(user=Depends(get_current_user)):
-    return load_signals_history(days=90)
+    return load_signals_history(days=365)
 
 
 # ── Portfolio ─────────────────────────────────────────────────────────────────

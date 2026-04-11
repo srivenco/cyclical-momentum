@@ -242,7 +242,7 @@ export default function SignalHistory() {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-white">Signal History — Last 90 Days</h2>
+          <h2 className="text-sm font-semibold text-white">Signal History — Last 365 Days</h2>
           <p className="text-xs mt-0.5" style={{ color: '#475569' }}>
             {signals.length} signals generated · click a row to see details
           </p>
@@ -282,7 +282,7 @@ export default function SignalHistory() {
           <p className="text-sm font-medium text-white mb-1">No signals found</p>
           <p className="text-xs" style={{ color: '#475569' }}>
             {signals.length === 0
-              ? 'The daily scan has not run yet, or no signals have been generated in the last 90 days.'
+              ? 'The daily scan has not run yet, or no signals have been generated in the last 365 days.'
               : 'Try adjusting the filters above.'}
           </p>
         </div>
