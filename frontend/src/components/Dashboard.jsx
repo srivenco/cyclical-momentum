@@ -4,12 +4,14 @@ import SignalFeed from './SignalFeed';
 import PortfolioSummary from './PortfolioSummary';
 import EquityCurve from './EquityCurve';
 import MacroDetail from './MacroDetail';
+import SignalHistory from './SignalHistory';
 import CapitalSettings from './CapitalSettings';
 import { useCapital } from '../hooks/useCapital';
 import { getMacro } from '../api';
 
 const TABS = [
   { id: 'signals',     label: 'Signals' },
+  { id: 'history',     label: 'History' },
   { id: 'portfolio',   label: 'Portfolio' },
   { id: 'macro',       label: 'Macro Regime' },
   { id: 'performance', label: 'Performance' },
@@ -91,6 +93,7 @@ export default function Dashboard({ onLogout }) {
 
           <div className="flex-1 overflow-y-auto p-4">
             {activeTab === 'signals'     && <SignalFeed />}
+            {activeTab === 'history'     && <SignalHistory />}
             {activeTab === 'portfolio'   && <PortfolioSummary />}
             {activeTab === 'macro'       && <MacroDetail />}
             {activeTab === 'performance' && <EquityCurve />}
