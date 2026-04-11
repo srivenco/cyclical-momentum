@@ -160,6 +160,75 @@ const trend = (above) => {
     : <span style={{ color: C.red,   fontSize: 10 }}>▼ 200MA</span>;
 };
 
+// ── Next-phase transition playbook ────────────────────────────────────────────
+// Key: CURRENT → NEXT transition. These are actionable NOW, before the shift.
+const NEXT_PHASE_INVESTING = {
+
+  // ── US transitions ──────────────────────────────────────────────────────────
+  'RECOVERY→EXPANSION': {
+    start:   ['Financials (JPM, BAC)', 'Industrials (CAT, DE)', 'Consumer Disc (AMZN, HD)', 'Mid/Small Caps (IWM)'],
+    reduce:  ['Long bonds (TLT)', 'Gold (GLD)', 'Utilities (XLU)'],
+    trigger: 'ISM Manufacturing > 55 · Credit spreads below 300bps · Payrolls accelerating',
+    etfs:    ['XLF', 'XLI', 'XLY', 'IWM'],
+  },
+  'EXPANSION→LATE CYCLE': {
+    start:   ['Energy (XOM, CVX)', 'Materials (FCX, NEM)', 'Healthcare (JNJ, UNH)', 'TIPS / Real assets'],
+    reduce:  ['Consumer Disc', 'Financials — peak margins', 'High-PE growth names'],
+    trigger: 'Yield curve flattening < 50bps · ISM starts rolling over · Wage inflation > 4%',
+    etfs:    ['XLE', 'XLB', 'XLV', 'TIP'],
+  },
+  'LATE CYCLE→SLOWDOWN': {
+    start:   ['Healthcare (XLV)', 'Utilities (XLU)', 'Staples (XLP)', 'Quality bonds (LQD)', 'Add TLT'],
+    reduce:  ['Cyclicals (XLB, XLE)', 'Small caps', 'Banks — spread risk rising'],
+    trigger: 'Yield curve inverts · HYG/LQD ratio peaks · LEI falls 3 months consecutive',
+    etfs:    ['XLV', 'XLU', 'XLP', 'TLT', 'LQD'],
+  },
+  'SLOWDOWN→RECESSION': {
+    start:   ['Gold (GLD, IAU)', 'Long bonds (TLT)', 'Cash / T-bills', 'Utilities (XLU)'],
+    reduce:  ['All cyclicals', 'Banks', 'Real estate', 'Consumer Disc — discretionary cuts'],
+    trigger: 'GDP negative 2 quarters · Unemployment rising > 0.5% · HYG credit spreads blow out',
+    etfs:    ['GLD', 'TLT', 'BIL', 'XLU'],
+  },
+  'RECESSION→RECOVERY': {
+    start:   ['Small caps (IWM) — lead cycles', 'Quality Tech (QQQ)', 'Financials (XLF)', 'Consumer Disc (XLY)'],
+    reduce:  ['Gold — real rates will rise', 'Long bonds — steepening ahead', 'Staples — expensive defensives'],
+    trigger: 'Fed pivot / first rate cut · ISM bottoming · Leading indicators turn up · HYG recovering',
+    etfs:    ['IWM', 'XLF', 'XLY', 'QQQ'],
+  },
+
+  // ── India transitions ────────────────────────────────────────────────────────
+  'RATE CUT CYCLE→BULL': {
+    start:   ['Banks & NBFCs — credit cycle begins', 'Realty (DLF, Prestige)', 'Auto (M&M, Maruti)', 'Consumer Disc'],
+    reduce:  ['IT — rupee risk as growth returns', 'Defensive Pharma — rotation out'],
+    trigger: 'Nifty > 200MA sustained · FII buying > ₹5,000 Cr/month · Credit growth > 12% YoY',
+    etfs:    ['BANKNIFTY ETF', 'NIFTY REALTY ETF', 'NIFTY AUTO ETF'],
+  },
+  'BULL→CAUTIOUS': {
+    start:   ['Quality largecaps (HDFC Bank, Infosys, HUL)', 'IT — USD earnings hedge', 'FMCG — defensive'],
+    reduce:  ['Realty — peak valuations', 'Midcap/smallcap — froth forming', 'Leveraged plays'],
+    trigger: 'Nifty PE > 24x · FII flows slowing / turning negative · India VIX > 15 sustained',
+    etfs:    ['NIFTY50 ETF', 'NIFTY IT ETF', 'NIFTY FMCG ETF'],
+  },
+  'CAUTIOUS→CORRECTION': {
+    start:   ['IT (TCS, Infy) — weak INR tailwind', 'Pharma exports (Sun, Dr Reddy)', 'Gold ETFs (SGB, GoldBees)', 'Raise cash'],
+    reduce:  ['Banks — NPA risk rising', 'Realty — rate risk', 'Consumer Disc — demand softens'],
+    trigger: 'Nifty breaks 200MA · FII monthly net sell > ₹10,000 Cr · USDINR > 85 · India VIX > 18',
+    etfs:    ['NIFTY IT ETF', 'NIFTY PHARMA ETF', 'GOLDBEES / SGB'],
+  },
+  'CORRECTION→BEAR': {
+    start:   ['Gold — maximum allocation', 'IT (hold)', 'Cash / liquid funds', 'Short beta (avoid mid/small)'],
+    reduce:  ['All cyclicals: Banks, Auto, Realty, Infra', 'Midcap/smallcap index exposure'],
+    trigger: 'Nifty -15% from peak · Sustained FII outflow · Global risk-off (VIX > 30) · INR > 87',
+    etfs:    ['GOLDBEES', 'LIQUID FUND', 'NIFTY IT ETF'],
+  },
+  'BEAR→RATE CUT CYCLE': {
+    start:   ['Banks & NBFCs — rate-sensitive first movers', 'Realty (DLF, Oberoi)', 'Auto — EMI demand', 'Consumer (discretionary)'],
+    reduce:  ['Gold — real rates rising', 'IT — INR strengthens with inflows'],
+    trigger: 'RBI first rate cut · FII flows turn positive · Nifty > 50MA · India VIX < 16',
+    etfs:    ['BANKNIFTY ETF', 'NIFTY REALTY ETF', 'NIFTY AUTO ETF'],
+  },
+};
+
 const fmtCr = (n) => {
   if (n == null) return '—';
   const abs = Math.abs(n);
@@ -635,10 +704,12 @@ function CycleScorecardPanel({ cycle, market }) {
   const score    = cycle.score_pct ?? 50;
   const barColor = score >= 65 ? C.green : score >= 50 ? C.amber : score >= 35 ? C.orange : C.red;
 
-  const currentIdx  = phaseOrder.indexOf(cycle.phase);
-  const nextPhase   = phaseOrder[(currentIdx + 1) % phaseOrder.length];
-  const nextColor   = WHEEL_COLOR[nextPhase] || C.muted;
+  const currentIdx      = phaseOrder.indexOf(cycle.phase);
+  const nextPhase       = phaseOrder[(currentIdx + 1) % phaseOrder.length];
+  const nextColor       = WHEEL_COLOR[nextPhase] || C.muted;
   const historicalSectors = HISTORICAL_SECTORS[cycle.phase] || [];
+  const transitionKey   = `${cycle.phase}→${nextPhase}`;
+  const nextInvesting   = NEXT_PHASE_INVESTING[transitionKey] || null;
 
   return (
     <div className="rounded-xl overflow-hidden flex flex-col"
@@ -748,7 +819,7 @@ function CycleScorecardPanel({ cycle, market }) {
       )}
 
       {/* ── Sector playbook ── */}
-      <div style={{ padding: '12px 16px' }}>
+      <div style={{ padding: '12px 16px', borderBottom: nextInvesting ? `1px solid ${C.border}` : 'none' }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: C.muted,
                       textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
           Current Playbook
@@ -792,6 +863,99 @@ function CycleScorecardPanel({ cycle, market }) {
           </div>
         </div>
       </div>
+
+      {/* ── Position for next phase ── */}
+      {nextInvesting && (
+        <div style={{
+          padding: '14px 16px',
+          background: `linear-gradient(135deg, ${nextColor}08 0%, transparent 100%)`,
+          borderTop: `2px dashed ${nextColor}40`,
+        }}>
+          {/* Title */}
+          <div className="flex items-center gap-2 mb-10" style={{ marginBottom: 10 }}>
+            <div style={{
+              fontSize: 10, fontWeight: 700, color: nextColor,
+              textTransform: 'uppercase', letterSpacing: '0.06em',
+            }}>
+              ▸ Position NOW for
+            </div>
+            <div style={{
+              fontSize: 11, fontWeight: 800, color: nextColor,
+              padding: '2px 8px', borderRadius: 5,
+              backgroundColor: `${nextColor}18`,
+              border: `1px solid ${nextColor}50`,
+            }}>
+              {nextPhase}
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+            {/* Start buying */}
+            <div style={{
+              padding: '10px 12px', borderRadius: 8,
+              backgroundColor: 'rgba(34,197,94,0.06)',
+              border: '1px solid rgba(34,197,94,0.18)',
+            }}>
+              <div style={{ fontSize: 10, color: C.green, fontWeight: 700, marginBottom: 6 }}>
+                ✦ Start Buying
+              </div>
+              <div className="flex flex-col gap-1">
+                {(nextInvesting.start || []).map((s, i) => (
+                  <div key={i} style={{ fontSize: 10, color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>
+                    · {s}
+                  </div>
+                ))}
+              </div>
+              {nextInvesting.etfs?.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-6" style={{ marginTop: 8 }}>
+                  {nextInvesting.etfs.map((e, i) => (
+                    <span key={i} style={{
+                      fontSize: 9, padding: '1px 5px', borderRadius: 3, fontWeight: 700,
+                      backgroundColor: 'rgba(34,197,94,0.15)',
+                      color: C.green, border: '1px solid rgba(34,197,94,0.3)',
+                    }}>{e}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Start reducing */}
+            <div style={{
+              padding: '10px 12px', borderRadius: 8,
+              backgroundColor: 'rgba(239,68,68,0.06)',
+              border: '1px solid rgba(239,68,68,0.18)',
+            }}>
+              <div style={{ fontSize: 10, color: C.red, fontWeight: 700, marginBottom: 6 }}>
+                ✦ Start Reducing
+              </div>
+              <div className="flex flex-col gap-1">
+                {(nextInvesting.reduce || []).map((s, i) => (
+                  <div key={i} style={{ fontSize: 10, color: 'rgba(255,255,255,0.85)', lineHeight: 1.4 }}>
+                    · {s}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Trigger to confirm transition */}
+          {nextInvesting.trigger && (
+            <div style={{
+              padding: '8px 12px', borderRadius: 7,
+              backgroundColor: `${nextColor}0d`,
+              border: `1px solid ${nextColor}30`,
+            }}>
+              <div style={{ fontSize: 9, color: nextColor, fontWeight: 700,
+                            textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
+                ⚡ Confirm Transition When
+              </div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', lineHeight: 1.5 }}>
+                {nextInvesting.trigger}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
