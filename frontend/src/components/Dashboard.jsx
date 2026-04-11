@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useState, useEffect } from 'react';
 import MacroRegime from './MacroRegime';
 import SignalFeed from './SignalFeed';
 import PortfolioSummary from './PortfolioSummary';
