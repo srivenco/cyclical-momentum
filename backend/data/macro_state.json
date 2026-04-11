@@ -1,0 +1,18 @@
+{
+  "date": null,
+  "nifty_vs_200ma": 0,
+  "nifty_regime": "UNKNOWN",
+  "crude_trend": "UNKNOWN",
+  "copper_trend": "UNKNOWN",
+  "us10y_63d_change": 0,
+  "rate_regime": "NEUTRAL",
+  "commodity_bull": false,
+  "active_books": [],
+  "inactive_books": [],
+  "nifty_price": 0,
+  "nifty_ma200": 0,
+  "crude_price": 0,
+  "copper_price": 0,
+  "us10y": 0,
+  "updated_at": null
+}
