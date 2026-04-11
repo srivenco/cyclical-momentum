@@ -260,6 +260,7 @@ export default function PortfolioSummary() {
                     <th className="px-3 py-2.5 text-right font-medium">CMP</th>
                     <th className="px-3 py-2.5 text-right font-medium">P&L%</th>
                     <th className="px-3 py-2.5 text-right font-medium">Stop</th>
+                    <th className="px-3 py-2.5 text-right font-medium">Target</th>
                     <th className="px-3 py-2.5 text-right font-medium">Days</th>
                     <th className="px-3 py-2.5 text-center font-medium">Actions</th>
                   </tr>
@@ -282,6 +283,16 @@ export default function PortfolioSummary() {
                           {t.pnl_pct != null ? `${t.pnl_pct >= 0 ? '+' : ''}${t.pnl_pct}%` : '—'}
                         </td>
                         <td className="px-3 py-2.5 text-right" style={{ color: '#ef4444' }}>₹{t.current_stop}</td>
+                        <td className="px-3 py-2.5 text-right">
+                          {t.target_price ? (
+                            <div>
+                              <span style={{ color: t.at_target ? '#34d399' : '#64748b' }}>₹{t.target_price}</span>
+                              {t.at_target && (
+                                <div className="text-xs mt-0.5 font-semibold" style={{ color: '#34d399' }}>🎯 At Target</div>
+                              )}
+                            </div>
+                          ) : <span style={{ color: '#334155' }}>—</span>}
+                        </td>
                         <td className="px-3 py-2.5 text-right" style={{ color: '#94a3b8' }}>{days}</td>
                         <td className="px-3 py-2.5 text-center">
                           <div className="flex gap-1.5 justify-center">

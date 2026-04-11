@@ -40,9 +40,14 @@ function TradeModal({ signal, suggestedQty, onClose, onSubmit }) {
       <div className="w-full max-w-sm mx-4 rounded-2xl p-6"
            style={{ backgroundColor: '#0D1F3C', border: '1px solid #1E3558' }}>
         <h3 className="text-base font-semibold text-white mb-1">Mark as Traded</h3>
-        <p className="text-sm mb-4" style={{ color: '#64748b' }}>
+        <p className="text-sm mb-1" style={{ color: '#64748b' }}>
           {signal.ticker.replace('.NS','')} — Entry ₹{signal.entry_price} | Stop ₹{signal.initial_stop} ({signal.stop_pct}%)
         </p>
+        {signal.target_price && (
+          <p className="text-xs mb-4" style={{ color: '#34d399' }}>
+            🎯 Target ₹{signal.target_price} (2:1 R:R)
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1.5" style={{ color: '#94a3b8' }}>
@@ -134,6 +139,7 @@ export default function SignalFeed() {
         ticker: signal.ticker, book: signal.book, entry_date: signal.date,
         entry_price: signal.entry_price, quantity: qty,
         initial_stop: signal.initial_stop, current_stop: signal.initial_stop,
+        target_price: signal.target_price || null,
       });
       showToast(`${signal.ticker.replace('.NS','')} added to portfolio`);
       setModalSignal(null);
@@ -263,6 +269,7 @@ function SignalTable({ signals, onTrade, showAction, calcPositionSize }) {
               <th className="px-3 py-2.5 text-right font-medium">Entry</th>
               <th className="px-3 py-2.5 text-right font-medium">Stop</th>
               <th className="px-3 py-2.5 text-right font-medium">Stop%</th>
+              <th className="px-3 py-2.5 text-right font-medium">Target</th>
               <th className="px-3 py-2.5 text-right font-medium">Vol Ratio</th>
               <th className="px-3 py-2.5 text-right font-medium">Momentum</th>
               <th className="px-3 py-2.5 text-center font-medium">Strength</th>
@@ -286,6 +293,9 @@ function SignalTable({ signals, onTrade, showAction, calcPositionSize }) {
                   <td className="px-3 py-2.5 text-right text-white" style={{ backgroundColor: rowBg }}>₹{s.entry_price}</td>
                   <td className="px-3 py-2.5 text-right" style={{ color: '#ef4444', backgroundColor: rowBg }}>₹{s.initial_stop}</td>
                   <td className="px-3 py-2.5 text-right" style={{ color: '#ef4444', backgroundColor: rowBg }}>{s.stop_pct}%</td>
+                  <td className="px-3 py-2.5 text-right font-semibold" style={{ color: '#34d399', backgroundColor: rowBg }}>
+                    {s.target_price ? `₹${s.target_price}` : '—'}
+                  </td>
                   <td className="px-3 py-2.5 text-right text-white" style={{ backgroundColor: rowBg }}>{s.vol_ratio}x</td>
                   <td className="px-3 py-2.5 text-right" style={{ color: '#34d399', backgroundColor: rowBg }}>+{s.prior_20d_return}%</td>
                   <td className="px-3 py-2.5 text-center" style={{ backgroundColor: rowBg }}>

@@ -89,6 +89,7 @@ class TradeRequest(BaseModel):
     quantity: int
     initial_stop: float
     current_stop: Optional[float] = None
+    target_price: Optional[float] = None   # 2:1 R:R target from signal
 
 
 class ExitRequest(BaseModel):
@@ -222,6 +223,9 @@ def get_portfolio(user=Depends(get_current_user)):
                 )
             else:
                 t["pnl_pct"] = None
+            # Flag at-target trades (current price >= target price)
+            target = t.get("target_price")
+            t["at_target"] = bool(target and current is not None and current >= target)
         enriched_trades.append(t)
 
     # Summary stats
@@ -267,6 +271,7 @@ def add_trade(body: TradeRequest, user=Depends(get_current_user)):
         "quantity": body.quantity,
         "initial_stop": body.initial_stop,
         "current_stop": body.current_stop or body.initial_stop,
+        "target_price": body.target_price,   # 2:1 R:R target
         "status": "open",
         "exit_date": None,
         "exit_price": None,

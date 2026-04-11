@@ -140,6 +140,12 @@ function SignalRow({ signal, expanded, onToggle }) {
                 <p className="text-xs mb-1" style={{ color: '#475569' }}>Stop %</p>
                 <p style={{ color: '#ef4444' }}>{signal.stop_pct}%</p>
               </div>
+              {signal.target_price && (
+                <div>
+                  <p className="text-xs mb-1" style={{ color: '#475569' }}>Target (2:1 R:R)</p>
+                  <p style={{ color: '#34d399' }}>₹{signal.target_price}</p>
+                </div>
+              )}
               {hasExit && (
                 <>
                   <div>

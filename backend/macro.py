@@ -131,8 +131,31 @@ def detect_regime() -> dict:
     elif us10y_change < -RATE_CHANGE_THRESHOLD:
         rate_regime = "CUT"
 
+    # ── Regime strength scoring ───────────────────────────────────────────────
+    # Nifty strength: how far above/below 200MA
+    if nifty_pct > 5:
+        nifty_strength = "STRONG_BULL"
+    elif nifty_pct > 0:
+        nifty_strength = "WEAK_BULL"
+    elif nifty_pct > -3:
+        nifty_strength = "BORDERLINE_BEAR"
+    else:
+        nifty_strength = "STRONG_BEAR"
+
+    # Rate strength: magnitude of 63d US10Y change (in %)
+    if us10y_change > 0.50:
+        rate_strength = "STRONG_HIKE"
+    elif us10y_change > RATE_CHANGE_THRESHOLD:
+        rate_strength = "MILD_HIKE"
+    elif us10y_change < -0.50:
+        rate_strength = "STRONG_CUT"
+    elif us10y_change < -RATE_CHANGE_THRESHOLD:
+        rate_strength = "MILD_CUT"
+    else:
+        rate_strength = "NEUTRAL"
+
     # ── Active books ─────────────────────────────────────────────────────────
-    active_books = []
+    active_books   = []
     inactive_books = []
 
     if commodity_bull:
@@ -159,10 +182,12 @@ def detect_regime() -> dict:
         "date": date.today().isoformat(),
         "nifty_vs_200ma": nifty_pct,
         "nifty_regime": nifty_regime,
+        "nifty_strength": nifty_strength,
         "crude_trend": crude_trend_str,
         "copper_trend": copper_trend_str,
         "us10y_63d_change": us10y_change,
         "rate_regime": rate_regime,
+        "rate_strength": rate_strength,
         "commodity_bull": commodity_bull,
         "active_books": active_books,
         "inactive_books": inactive_books,
@@ -206,7 +231,9 @@ def _append_macro_history(state: dict):
         "date": today,
         "active_books": state.get("active_books", []),
         "nifty_regime": state.get("nifty_regime"),
+        "nifty_strength": state.get("nifty_strength"),
         "rate_regime": state.get("rate_regime"),
+        "rate_strength": state.get("rate_strength"),
         "commodity_bull": state.get("commodity_bull", False),
         "nifty_vs_200ma": state.get("nifty_vs_200ma"),
         "nifty_price": state.get("nifty_price"),

@@ -273,6 +273,12 @@ export default function MacroDetail() {
           <TrendBar value={niftyDelta} min={-15} max={15} color={niftyColor} />
           <p className="text-xs mt-2" style={{ color: '#64748b' }}>
             Regime: <span style={{ color: niftyColor, fontWeight: 600 }}>{macro.nifty_regime}</span>
+            {macro.nifty_strength && (
+              <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-semibold"
+                    style={{ backgroundColor: `${niftyColor}22`, color: niftyColor }}>
+                {macro.nifty_strength}
+              </span>
+            )}
             {' '}— threshold is 0% (price vs 200-day SMA)
           </p>
         </div>
@@ -291,6 +297,12 @@ export default function MacroDetail() {
           <TrendBar value={macro.us10y_63d_change} min={-0.5} max={0.5} color={rateColor} />
           <p className="text-xs mt-2" style={{ color: '#64748b' }}>
             Regime: <span style={{ color: rateColor, fontWeight: 600 }}>{macro.rate_regime}</span>
+            {macro.rate_strength && (
+              <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-semibold"
+                    style={{ backgroundColor: `${rateColor}22`, color: rateColor }}>
+                {macro.rate_strength}
+              </span>
+            )}
             {' '}— HIKE {'>'} +0.20%, CUT {'<'} −0.20%
           </p>
         </div>
@@ -346,8 +358,10 @@ export default function MacroDetail() {
                    note={`63d change: ${macro.us10y_63d_change > 0 ? '+' : ''}${macro.us10y_63d_change?.toFixed(3)}%`}
                    color={rateColor} />
         <MetricRow label="Commodity Bull" value={macro.commodity_bull ? 'YES' : 'NO'} color={commodityColor} />
-        <MetricRow label="Rate Regime" value={macro.rate_regime} color={rateColor} />
-        <MetricRow label="Nifty Regime" value={macro.nifty_regime} color={niftyColor} />
+        <MetricRow label="Rate Regime" value={macro.rate_regime} color={rateColor}
+                   note={macro.rate_strength || undefined} />
+        <MetricRow label="Nifty Regime" value={macro.nifty_regime} color={niftyColor}
+                   note={macro.nifty_strength || undefined} />
       </div>
 
       {/* Plain-English narrative */}

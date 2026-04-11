@@ -1,11 +1,17 @@
 """
 signals.py — Signal generation for Cyclical Momentum Strategy.
-Implements exact parameters from BUILD_INSTRUCTIONS — do not change.
+CIO improvements v2:
+  - ATR-based stops (1.5× ATR14, capped at 10%)
+  - Expanded universe: ~120 stocks across Nifty Midcap/Smallcap sectors
+  - 3-day crossover window (not strict 1-day)
+  - Relative strength filter for Defensive book
+  - target_price field on every signal (2:1 R:R)
+  - MA20 for Defensive book; MA50 for all others
 """
 
 import json
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -16,49 +22,111 @@ import yfinance as yf
 logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).parent / "data"
-SIGNALS_LATEST_FILE = DATA_DIR / "signals_latest.json"
+SIGNALS_LATEST_FILE  = DATA_DIR / "signals_latest.json"
 SIGNALS_HISTORY_FILE = DATA_DIR / "signals_history.json"
+SIGNALS_WARMING_FILE = DATA_DIR / "signals_warming.json"
 
-# ── Strategy Parameters (HARDCODED — do not change) ──────────────────────────
-VOL_THRESHOLD_DEFAULT = 2.0
+# ── Strategy Parameters ───────────────────────────────────────────────────────
+VOL_THRESHOLD_DEFAULT   = 2.0
 VOL_THRESHOLD_COMMODITY = 3.0
-SWING_LOW_N = 8
-STOP_FALLBACK_PCT = 0.07
-MOMENTUM_FILTER_PCT = 0.05
-COOLDOWN_DAYS = 30
+ATR_MULTIPLIER          = 1.5   # 1.5 × ATR(14)
+ATR_MAX_STOP_PCT        = 0.10  # cap stop distance at 10% of entry
+STOP_FALLBACK_PCT       = 0.07
+MOMENTUM_FILTER_PCT     = 0.05  # 20-day momentum must exceed this
+MOMENTUM_FILTER_DEFENSIVE = 0.03  # lower bar for defensive (already outperforming)
+COOLDOWN_DAYS           = 30
 SEASONAL_EXCLUDE_MONTHS = [1, 2]
-MA_FILTER = 50
-CIRCUIT_BREAKER_LOSSES = 3
+MA_FILTER_STANDARD      = 50
+MA_FILTER_DEFENSIVE     = 20    # faster MA for defensive / IT / FMCG
+CIRCUIT_BREAKER_LOSSES  = 3
+CROSSOVER_WINDOW_DAYS   = 3     # signal fires if crossover happened within 3 trading days
 
-# ── Universe ─────────────────────────────────────────────────────────────────
+# ── Expanded Universe ─────────────────────────────────────────────────────────
 COMMODITY_BOOK = {
-    "METAL": ["APLAPOLLO.NS", "JINDALSTEL.NS", "SAIL.NS", "NMDC.NS", "MOIL.NS",
-              "NATIONALUM.NS", "HINDZINC.NS"],
-    "ENERGY": ["JSWENERGY.NS", "TATAPOWER.NS", "ADANIGREEN.NS", "PFC.NS", "RECLTD.NS",
-               "NHPC.NS", "SJVN.NS", "CESC.NS", "WAAREEENER.NS"],
+    "METAL": [
+        # Original
+        "APLAPOLLO.NS", "JINDALSTEL.NS", "SAIL.NS", "NMDC.NS", "MOIL.NS",
+        "NATIONALUM.NS", "HINDZINC.NS",
+        # Added (Nifty Midcap/Smallcap metals)
+        "JSWSTEEL.NS", "TATASTEEL.NS", "HINDALCO.NS", "VEDL.NS",
+        "RATNAMANI.NS", "HINDCOPPER.NS", "WELCORP.NS",
+    ],
+    "ENERGY": [
+        # Original
+        "JSWENERGY.NS", "TATAPOWER.NS", "ADANIGREEN.NS", "PFC.NS", "RECLTD.NS",
+        "NHPC.NS", "SJVN.NS", "CESC.NS", "WAAREEENER.NS",
+        # Added
+        "NTPC.NS", "POWERGRID.NS", "TORNTPOWER.NS", "GAIL.NS",
+        "PETRONET.NS", "IEX.NS",
+    ],
 }
+
 RATEHIKE_BOOK = {
-    "ENERGY": ["JSWENERGY.NS", "TATAPOWER.NS", "CESC.NS", "NHPC.NS", "SJVN.NS"],
-    "FMCG": ["MARICO.NS", "DABUR.NS", "COLPAL.NS", "GODREJCP.NS", "TATACONSUM.NS"],
+    "ENERGY": [
+        # Original
+        "JSWENERGY.NS", "TATAPOWER.NS", "CESC.NS", "NHPC.NS", "SJVN.NS",
+        # Added
+        "NTPC.NS", "POWERGRID.NS", "TORNTPOWER.NS", "GAIL.NS", "IEX.NS",
+    ],
+    "FMCG": [
+        # Original
+        "MARICO.NS", "DABUR.NS", "COLPAL.NS", "GODREJCP.NS", "TATACONSUM.NS",
+        # Added (stable FMCG beneficiaries in high-rate environment)
+        "EMAMILTD.NS", "VARUNBEV.NS", "RADICO.NS", "JYOTHYLAB.NS", "BIKAJI.NS",
+    ],
 }
+
 RATECUT_BOOK = {
-    "BANK": ["IDFCFIRSTB.NS", "FEDERALBNK.NS", "RBLBANK.NS", "AUBANK.NS",
-             "BANDHANBNK.NS", "EQUITASBNK.NS"],
-    "REALTY": ["DLF.NS", "GODREJPROP.NS", "OBEROIRLTY.NS", "PRESTIGE.NS",
-               "PHOENIXLTD.NS", "BRIGADE.NS"],
-    "INFRA": ["KNRCON.NS", "NCC.NS", "PNCINFRA.NS", "IRB.NS", "RVNL.NS",
-              "RAILTEL.NS", "HAL.NS", "BEL.NS"],
+    "BANK": [
+        # Original
+        "IDFCFIRSTB.NS", "FEDERALBNK.NS", "RBLBANK.NS", "AUBANK.NS",
+        "BANDHANBNK.NS", "EQUITASBNK.NS",
+        # Added (small finance + regional banks most rate-sensitive)
+        "KARURVYSYA.NS", "DCBBANK.NS", "SURYODAY.NS", "UJJIVANSFB.NS",
+        "CSBBANK.NS", "UTKARSHBNK.NS",
+    ],
+    "REALTY": [
+        # Original
+        "DLF.NS", "GODREJPROP.NS", "OBEROIRLTY.NS", "PRESTIGE.NS",
+        "PHOENIXLTD.NS", "BRIGADE.NS",
+        # Added
+        "SOBHA.NS", "ANANTRAJ.NS", "KOLTEPATIL.NS", "SUNTECK.NS", "RAYMOND.NS",
+    ],
+    "INFRA": [
+        # Original
+        "KNRCON.NS", "NCC.NS", "PNCINFRA.NS", "IRB.NS", "RVNL.NS",
+        "RAILTEL.NS", "HAL.NS", "BEL.NS",
+        # Added
+        "AHLUCONT.NS", "PSPPROJECT.NS", "GRINFRA.NS", "DBL.NS",
+        "JKCEMENT.NS", "RAMCOCEM.NS", "APOLLOPIPE.NS",
+    ],
 }
+
 DEFENSIVE_BOOK = {
-    "PHARMA": ["LAURUSLABS.NS", "GRANULES.NS", "NATCOPHARM.NS", "IPCALAB.NS",
-               "ALKEM.NS", "ZYDUSLIFE.NS", "SOLARA.NS", "METROPOLIS.NS",
-               "LALPATHLAB.NS", "MANKIND.NS"],
+    "PHARMA": [
+        # Original (removed SOLARA due to operational issues)
+        "LAURUSLABS.NS", "GRANULES.NS", "NATCOPHARM.NS", "IPCALAB.NS",
+        "ALKEM.NS", "ZYDUSLIFE.NS", "METROPOLIS.NS", "LALPATHLAB.NS", "MANKIND.NS",
+        # Added
+        "GLENMARK.NS", "TORNTPHARM.NS", "AJANTPHARM.NS", "CIPLA.NS",
+        "GLAND.NS", "ASTRAZEN.NS",
+    ],
+    "IT": [
+        # IT outperforms in bear markets (USD-earning, cash-rich, low-capex)
+        "LTIM.NS", "COFORGE.NS", "PERSISTENT.NS", "MPHASIS.NS",
+        "KPITTECH.NS", "TATAELXSI.NS", "HAPPSTMNDS.NS", "MASTEK.NS",
+    ],
+    "FMCG": [
+        # Defensive consumer staples
+        "EMAMILTD.NS", "VARUNBEV.NS", "RADICO.NS", "JYOTHYLAB.NS",
+        "BIKAJI.NS", "MARICO.NS", "TATACONSUM.NS",
+    ],
 }
 
 BOOK_MAP = {
     "F2_COMMODITY": (COMMODITY_BOOK, VOL_THRESHOLD_COMMODITY),
     "F3B_RATEHIKE": (RATEHIKE_BOOK, VOL_THRESHOLD_DEFAULT),
-    "F_RATECUT": (RATECUT_BOOK, VOL_THRESHOLD_DEFAULT),
+    "F_RATECUT":    (RATECUT_BOOK,  VOL_THRESHOLD_DEFAULT),
     "F4_DEFENSIVE": (DEFENSIVE_BOOK, VOL_THRESHOLD_DEFAULT),
 }
 
@@ -72,7 +140,7 @@ def _load_history() -> list:
 
 
 def _tickers_in_cooldown(history: list) -> set:
-    """Return set of tickers that had a stop exit in the last COOLDOWN_DAYS days."""
+    """Return tickers that had a stop exit within COOLDOWN_DAYS."""
     today = date.today()
     cooldown_set = set()
     for sig in history:
@@ -100,26 +168,43 @@ def _circuit_breaker_status(history: list, book: str) -> bool:
     return all(s.get("pnl_pct", 0) < 0 for s in last_n)
 
 
-def _swing_low(close: pd.Series, n: int = SWING_LOW_N) -> Optional[float]:
-    """Find most recent swing low below last close using n candles each side."""
-    prices = close.values
-    last_price = prices[-1]
-    # Walk backwards from second-to-last bar to find a valid swing low
-    for i in range(len(prices) - n - 1, n, -1):
-        candidate = prices[i]
-        if candidate >= last_price:
-            continue
-        left = prices[i - n: i]
-        right = prices[i + 1: i + n + 1]
-        if len(left) < n or len(right) < n:
-            continue
-        if all(candidate <= p for p in left) and all(candidate <= p for p in right):
-            return float(candidate)
-    return None
+def _calc_atr_stop(df: pd.DataFrame, entry_price: float) -> float:
+    """
+    Calculate ATR-based stop: entry - 1.5 × ATR(14).
+    Capped so stop is no more than ATR_MAX_STOP_PCT below entry.
+    Falls back to percentage-based stop if data insufficient.
+    """
+    if len(df) < 20:
+        return round(entry_price * (1 - STOP_FALLBACK_PCT), 2)
+
+    high  = df["High"].squeeze()
+    low   = df["Low"].squeeze()
+    close = df["Close"].squeeze()
+    prev_close = close.shift(1)
+
+    tr = pd.concat([
+        high - low,
+        (high - prev_close).abs(),
+        (low  - prev_close).abs(),
+    ], axis=1).max(axis=1)
+    atr14 = float(tr.rolling(14).mean().iloc[-1])
+
+    if np.isnan(atr14) or atr14 <= 0:
+        return round(entry_price * (1 - STOP_FALLBACK_PCT), 2)
+
+    stop_distance = min(ATR_MULTIPLIER * atr14, entry_price * ATR_MAX_STOP_PCT)
+    return round(entry_price - stop_distance, 2)
 
 
-def _analyse_ticker(ticker: str, book: str, sector: str, threshold: float,
-                    cooldown_set: set, history: list) -> Optional[dict]:
+def _analyse_ticker(
+    ticker: str,
+    book: str,
+    sector: str,
+    threshold: float,
+    cooldown_set: set,
+    history: list,
+    nifty_20d_return: Optional[float] = None,
+) -> Optional[dict]:
     """Return a signal dict if all conditions are met, else None."""
     today = date.today()
 
@@ -140,50 +225,69 @@ def _analyse_ticker(ticker: str, book: str, sector: str, threshold: float,
     if df.empty or len(df) < 100:
         return None
 
-    close = df["Close"].squeeze()
+    # Flatten MultiIndex if present
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+
+    close  = df["Close"].squeeze()
     volume = df["Volume"].squeeze()
 
-    # Vol ratio
+    # Vol ratio series
     vol_10 = volume.rolling(10).mean()
-    vol_91 = volume.rolling(91).mean()
-    vol_ratio_series = vol_10 / vol_91.replace(0, np.nan)
+    vol_91 = volume.rolling(91).mean().replace(0, np.nan)
+    vol_ratio_series = vol_10 / vol_91
 
-    if len(vol_ratio_series) < 2:
+    # ── 3-day crossover window ────────────────────────────────────────────────
+    # Signal fires if: today >= threshold AND it was below threshold 3 bars ago
+    # (i.e., crossover happened within the last 3 trading days)
+    if len(vol_ratio_series) < CROSSOVER_WINDOW_DAYS + 2:
         return None
 
-    vol_today = float(vol_ratio_series.iloc[-1])
-    vol_yesterday = float(vol_ratio_series.iloc[-2])
+    vol_now   = float(vol_ratio_series.iloc[-1])
+    vol_3d_ago = float(vol_ratio_series.iloc[-(CROSSOVER_WINDOW_DAYS + 1)])
 
-    # Crossover: today >= threshold, yesterday < threshold
-    if not (vol_today >= threshold and vol_yesterday < threshold):
+    if pd.isna(vol_now) or pd.isna(vol_3d_ago):
+        return None
+    if not (vol_now >= threshold and vol_3d_ago < threshold):
         return None
 
-    # MA50 filter
-    ma50 = close.rolling(MA_FILTER).mean()
-    if float(close.iloc[-1]) <= float(ma50.iloc[-1]):
+    # ── MA filter (MA20 for Defensive, MA50 for others) ──────────────────────
+    ma_period = MA_FILTER_DEFENSIVE if book == "F4_DEFENSIVE" else MA_FILTER_STANDARD
+    ma = close.rolling(ma_period).mean()
+    if len(ma) < ma_period or float(close.iloc[-1]) <= float(ma.iloc[-1]):
         return None
 
-    # Momentum pre-filter: 20-day return > 5%
+    # ── 20-day momentum ───────────────────────────────────────────────────────
     if len(close) < 21:
         return None
+    mom_threshold = MOMENTUM_FILTER_DEFENSIVE if book == "F4_DEFENSIVE" else MOMENTUM_FILTER_PCT
     prior_20d_return = (float(close.iloc[-1]) - float(close.iloc[-21])) / float(close.iloc[-21])
-    if prior_20d_return <= MOMENTUM_FILTER_PCT:
+    if prior_20d_return <= mom_threshold:
         return None
 
-    # Stop calculation
-    entry_price = float(close.iloc[-1])
-    swing = _swing_low(close)
-    if swing is not None and swing < entry_price:
-        initial_stop = round(swing, 2)
-    else:
+    # ── Relative strength filter for Defensive book ───────────────────────────
+    # Stock's 20d return must exceed Nifty's 20d return (stock is outperforming)
+    if book == "F4_DEFENSIVE" and nifty_20d_return is not None:
+        if prior_20d_return <= nifty_20d_return:
+            return None
+
+    # ── ATR-based stop ────────────────────────────────────────────────────────
+    entry_price  = float(close.iloc[-1])
+    initial_stop = _calc_atr_stop(df, entry_price)
+    # Safety: stop must be below entry
+    if initial_stop >= entry_price:
         initial_stop = round(entry_price * (1 - STOP_FALLBACK_PCT), 2)
 
     stop_pct = round((initial_stop - entry_price) / entry_price * 100, 2)
 
-    # Signal strength
-    if vol_today >= threshold * 1.5:
+    # ── Target price (2:1 R:R) ───────────────────────────────────────────────
+    risk_distance = entry_price - initial_stop
+    target_price  = round(entry_price + 2.0 * risk_distance, 2)
+
+    # ── Signal strength ───────────────────────────────────────────────────────
+    if vol_now >= threshold * 1.5:
         strength = "STRONG"
-    elif vol_today >= threshold * 1.2:
+    elif vol_now >= threshold * 1.2:
         strength = "MODERATE"
     else:
         strength = "NORMAL"
@@ -197,14 +301,28 @@ def _analyse_ticker(ticker: str, book: str, sector: str, threshold: float,
         "sector": sector,
         "entry_price": round(entry_price, 2),
         "initial_stop": initial_stop,
+        "target_price": target_price,
         "stop_pct": stop_pct,
-        "vol_ratio": round(vol_today, 2),
+        "vol_ratio": round(vol_now, 2),
         "prior_20d_return": round(prior_20d_return * 100, 2),
-        "regime": book,   # overridden by caller
+        "regime": book,       # overridden by caller with readable label
         "signal_strength": strength,
         "circuit_breaker": circuit,
         "cap_type": "mid_small",
     }
+
+
+def _fetch_nifty_20d_return() -> Optional[float]:
+    """Download Nifty50 once; return its 20-day percentage return."""
+    try:
+        df = yf.download("^NSEI", period="60d", progress=False, auto_adjust=True)
+        if df.empty or len(df) < 21:
+            return None
+        close = df["Close"].squeeze()
+        return (float(close.iloc[-1]) - float(close.iloc[-21])) / float(close.iloc[-21])
+    except Exception as exc:
+        logger.warning(f"Nifty 20d return fetch failed: {exc}")
+        return None
 
 
 def generate_signals(active_books: list) -> dict:
@@ -215,10 +333,17 @@ def generate_signals(active_books: list) -> dict:
     today = date.today()
     logger.info(f"Generating signals for books: {active_books}")
 
-    history = _load_history()
+    history     = _load_history()
     cooldown_set = _tickers_in_cooldown(history)
 
-    signals = []
+    # Fetch Nifty 20d return once (used by Defensive book relative strength filter)
+    nifty_20d_return = None
+    if "F4_DEFENSIVE" in active_books:
+        nifty_20d_return = _fetch_nifty_20d_return()
+        logger.info(f"Nifty 20d return for relative strength filter: "
+                    f"{round(nifty_20d_return * 100, 2) if nifty_20d_return else 'N/A'}%")
+
+    signals       = []
     total_checked = 0
 
     for book_name in active_books:
@@ -228,10 +353,12 @@ def generate_signals(active_books: list) -> dict:
         for sector, tickers in universe.items():
             for ticker in tickers:
                 total_checked += 1
-                result = _analyse_ticker(ticker, book_name, sector, threshold,
-                                         cooldown_set, history)
+                result = _analyse_ticker(
+                    ticker, book_name, sector, threshold,
+                    cooldown_set, history,
+                    nifty_20d_return=nifty_20d_return if book_name == "F4_DEFENSIVE" else None,
+                )
                 if result is not None:
-                    # Tag the actual regime label
                     result["regime"] = _regime_label(book_name)
                     signals.append(result)
 
@@ -244,12 +371,10 @@ def generate_signals(active_books: list) -> dict:
         "generated_at": datetime.utcnow().isoformat() + "Z",
     }
 
-    # Persist
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     with open(SIGNALS_LATEST_FILE, "w") as f:
         json.dump(payload, f, indent=2)
 
-    # Append to history
     _append_to_history(signals)
 
     logger.info(f"Signals generated: {len(signals)} from {total_checked} stocks checked")
@@ -260,7 +385,7 @@ def _regime_label(book: str) -> str:
     mapping = {
         "F2_COMMODITY": "COMMODITY_BULL",
         "F3B_RATEHIKE": "RATE_HIKE",
-        "F_RATECUT": "RATE_CUT",
+        "F_RATECUT":    "RATE_CUT",
         "F4_DEFENSIVE": "NIFTY_BEAR",
     }
     return mapping.get(book, book)
@@ -289,14 +414,19 @@ def load_signals_latest() -> dict:
     }
 
 
-SIGNALS_WARMING_FILE = DATA_DIR / "signals_warming.json"
+def load_signals_history(days: int = 365) -> list:
+    history = _load_history()
+    cutoff_date = (date.today() - timedelta(days=days)).isoformat()
+    return [s for s in history if s.get("date", "") >= cutoff_date]
 
+
+# ── Warming-Up Watchlist ──────────────────────────────────────────────────────
 
 def generate_warming_up(active_books: list) -> list:
     """
     Return stocks approaching a vol-ratio crossover (60–95% of threshold).
-    Also checks price > MA50 and 20d momentum > 3%.
-    Results saved to signals_warming.json for API consumption.
+    Also checks price > MA and 20d momentum > 3%.
+    Results saved to signals_warming.json.
     """
     today = date.today()
     if today.month in SEASONAL_EXCLUDE_MONTHS:
@@ -309,7 +439,9 @@ def generate_warming_up(active_books: list) -> list:
             continue
         universe, threshold = BOOK_MAP[book_name]
         low_band  = threshold * 0.60
-        high_band = threshold * 1.00   # below this = not yet triggered
+        high_band = threshold * 1.00   # below threshold = not yet triggered
+
+        ma_period = MA_FILTER_DEFENSIVE if book_name == "F4_DEFENSIVE" else MA_FILTER_STANDARD
 
         for sector, tickers in universe.items():
             for ticker in tickers:
@@ -320,23 +452,25 @@ def generate_warming_up(active_books: list) -> list:
                 if df.empty or len(df) < 100:
                     continue
 
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = df.columns.get_level_values(0)
+
                 close  = df["Close"].squeeze()
                 volume = df["Volume"].squeeze()
 
                 vol_10 = volume.rolling(10).mean()
                 vol_91 = volume.rolling(91).mean().replace(0, np.nan)
-                vr = (vol_10 / vol_91)
+                vr     = vol_10 / vol_91
                 if len(vr) < 1 or pd.isna(vr.iloc[-1]):
                     continue
 
                 vr_now = float(vr.iloc[-1])
-                # Already triggered or too far away
                 if vr_now >= high_band or vr_now < low_band:
                     continue
 
-                # MA50 filter — price must be above (trend healthy)
-                ma50 = close.rolling(MA_FILTER).mean()
-                if len(ma50) < MA_FILTER or float(close.iloc[-1]) <= float(ma50.iloc[-1]):
+                # MA filter
+                ma = close.rolling(ma_period).mean()
+                if len(ma) < ma_period or float(close.iloc[-1]) <= float(ma.iloc[-1]):
                     continue
 
                 # Momentum: > 3% over 20 days
@@ -360,7 +494,6 @@ def generate_warming_up(active_books: list) -> list:
                     "date": today.isoformat(),
                 })
 
-    # Sort by proximity to trigger
     warming.sort(key=lambda x: x["pct_to_trigger"], reverse=True)
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -375,12 +508,3 @@ def load_warming_up() -> list:
         with open(SIGNALS_WARMING_FILE) as f:
             return json.load(f)
     return []
-
-
-def load_signals_history(days: int = 90) -> list:
-    history = _load_history()
-    cutoff = date.today().isoformat()
-    # Return last `days` calendar days
-    from datetime import timedelta
-    cutoff_date = (date.today() - timedelta(days=days)).isoformat()
-    return [s for s in history if s.get("date", "") >= cutoff_date]
