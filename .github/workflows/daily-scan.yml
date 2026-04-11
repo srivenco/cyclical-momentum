@@ -10,9 +10,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger daily scan on Render backend
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
         run: |
-          curl -s -o /dev/null -w "%{http_code}" \
-            -X POST "${{ secrets.VITE_API_URL }}/api/run-scan" \
-            -H "Authorization: Bearer ${{ secrets.SCAN_SECRET }}" \
-            -H "Content-Type: application/json"
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Run daily scan
+        run: |
+          cd backend
+          python scheduler.py
+        env:
+          APP_PASSWORD_HASH: ${{ secrets.APP_PASSWORD_HASH }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+      - name: Commit updated data files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add backend/data/
+          git diff --staged --quiet || git commit -m "chore: daily signal scan $(date -u +'%Y-%m-%d')"
+          git push
