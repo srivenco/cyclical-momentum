@@ -29,17 +29,21 @@ SIGNALS_WARMING_FILE = DATA_DIR / "signals_warming.json"
 # ── Strategy Parameters ───────────────────────────────────────────────────────
 VOL_THRESHOLD_DEFAULT   = 2.0
 VOL_THRESHOLD_COMMODITY = 3.0
-ATR_MULTIPLIER          = 1.5   # 1.5 × ATR(14)
-ATR_MAX_STOP_PCT        = 0.10  # cap stop distance at 10% of entry
-STOP_FALLBACK_PCT       = 0.07
-MOMENTUM_FILTER_PCT     = 0.05  # 20-day momentum must exceed this
+ATR_MULTIPLIER            = 1.5   # 1.5 × ATR(14)
+ATR_MAX_STOP_PCT          = 0.10  # cap stop distance at 10% of entry
+STOP_FALLBACK_PCT         = 0.07
+MOMENTUM_FILTER_PCT       = 0.05  # 20-day momentum must exceed this
 MOMENTUM_FILTER_DEFENSIVE = 0.03  # lower bar for defensive (already outperforming)
-COOLDOWN_DAYS           = 30
-SEASONAL_EXCLUDE_MONTHS = [1, 2]
-MA_FILTER_STANDARD      = 50
-MA_FILTER_DEFENSIVE     = 20    # faster MA for defensive / IT / FMCG
-CIRCUIT_BREAKER_LOSSES  = 3
-CROSSOVER_WINDOW_DAYS   = 3     # signal fires if crossover happened within 3 trading days
+MOMENTUM_MAX_PCT          = 0.25  # don't enter stocks that already ran >25% (chasing)
+COOLDOWN_DAYS             = 30    # days to stay out after a stop exit
+SIGNAL_REENTRY_DAYS       = 7     # don't re-enter same ticker within 7 days of ANY signal
+SEASONAL_EXCLUDE_MONTHS   = [1, 2]
+MA_FILTER_STANDARD        = 50
+MA_FILTER_DEFENSIVE       = 20    # faster MA for defensive / IT / FMCG
+CIRCUIT_BREAKER_LOSSES    = 3
+CROSSOVER_WINDOW_DAYS     = 3     # signal fires if crossover happened within 3 trading days
+CLOSE_POSITION_MIN        = 0.50  # close must be in upper 50% of day's range (bullish candle)
+REQUIRE_CLOSE_ABOVE_PREV  = True  # close today must be above yesterday's close
 
 # ── Expanded Universe ─────────────────────────────────────────────────────────
 COMMODITY_BOOK = {
@@ -72,18 +76,18 @@ RATEHIKE_BOOK = {
         # Original
         "MARICO.NS", "DABUR.NS", "COLPAL.NS", "GODREJCP.NS", "TATACONSUM.NS",
         # Added (stable FMCG beneficiaries in high-rate environment)
-        "EMAMILTD.NS", "VARUNBEV.NS", "RADICO.NS", "JYOTHYLAB.NS", "BIKAJI.NS",
+        # VARUNBEV.NS removed — delisted on NSE
+        "EMAMILTD.NS", "WESTLIFE.NS", "RADICO.NS", "JYOTHYLAB.NS", "BIKAJI.NS",
     ],
 }
 
 RATECUT_BOOK = {
     "BANK": [
-        # Original
+        # Rate-sensitive regional banks (quality filter: removed small finance banks
+        # SURYODAY, UJJIVANSFB, EQUITASBNK, UTKARSHBNK, CSBBANK — all showed 0 wins
+        # in 2-year backtest; their vol spikes are often distress, not breakouts)
         "IDFCFIRSTB.NS", "FEDERALBNK.NS", "RBLBANK.NS", "AUBANK.NS",
-        "BANDHANBNK.NS", "EQUITASBNK.NS",
-        # Added (small finance + regional banks most rate-sensitive)
-        "KARURVYSYA.NS", "DCBBANK.NS", "SURYODAY.NS", "UJJIVANSFB.NS",
-        "CSBBANK.NS", "UTKARSHBNK.NS",
+        "BANDHANBNK.NS", "KARURVYSYA.NS", "DCBBANK.NS",
     ],
     "REALTY": [
         # Original
@@ -92,14 +96,9 @@ RATECUT_BOOK = {
         # Added
         "SOBHA.NS", "ANANTRAJ.NS", "KOLTEPATIL.NS", "SUNTECK.NS", "RAYMOND.NS",
     ],
-    "INFRA": [
-        # Original
-        "KNRCON.NS", "NCC.NS", "PNCINFRA.NS", "IRB.NS", "RVNL.NS",
-        "RAILTEL.NS", "HAL.NS", "BEL.NS",
-        # Added
-        "AHLUCONT.NS", "PSPPROJECT.NS", "GRINFRA.NS", "DBL.NS",
-        "JKCEMENT.NS", "RAMCOCEM.NS", "APOLLOPIPE.NS",
-    ],
+    # INFRA removed: 0 wins from 9 signals over 2 years (RVNL, RAILTEL, etc.)
+    # Infrastructure vol spikes in a rate-cut environment tend to be catch-up rallies
+    # after massive prior runs — exactly the "chasing" pattern this strategy avoids.
 }
 
 DEFENSIVE_BOOK = {
@@ -118,7 +117,8 @@ DEFENSIVE_BOOK = {
     ],
     "FMCG": [
         # Defensive consumer staples
-        "EMAMILTD.NS", "VARUNBEV.NS", "RADICO.NS", "JYOTHYLAB.NS",
+        # VARUNBEV.NS removed — delisted on NSE
+        "EMAMILTD.NS", "WESTLIFE.NS", "RADICO.NS", "JYOTHYLAB.NS",
         "BIKAJI.NS", "MARICO.NS", "TATACONSUM.NS",
     ],
 }
@@ -140,14 +140,29 @@ def _load_history() -> list:
 
 
 def _tickers_in_cooldown(history: list) -> set:
-    """Return tickers that had a stop exit within COOLDOWN_DAYS."""
+    """
+    Return tickers that should be skipped today.
+    Two rules:
+      1. Post-stop cooldown: 30 days after a stop exit (avoid revenge entries)
+      2. Signal re-entry cooldown: 7 days after ANY signal (prevent consecutive
+         re-entries on the same stock while the vol surge is still active)
+    """
     today = date.today()
     cooldown_set = set()
     for sig in history:
+        # 30-day cooldown after stop exit
         if sig.get("exit_reason") == "stop" and sig.get("exit_date"):
             try:
                 exit_dt = date.fromisoformat(sig["exit_date"])
                 if (today - exit_dt).days <= COOLDOWN_DAYS:
+                    cooldown_set.add(sig["ticker"])
+            except ValueError:
+                pass
+        # 7-day cooldown after ANY signal (stop chasing the same vol surge)
+        if sig.get("date"):
+            try:
+                sig_dt = date.fromisoformat(sig["date"])
+                if (today - sig_dt).days <= SIGNAL_REENTRY_DAYS:
                     cooldown_set.add(sig["ticker"])
             except ValueError:
                 pass
@@ -264,11 +279,33 @@ def _analyse_ticker(
     prior_20d_return = (float(close.iloc[-1]) - float(close.iloc[-21])) / float(close.iloc[-21])
     if prior_20d_return <= mom_threshold:
         return None
+    # Cap: don't enter stocks that already ran >25% (late-entry / chasing)
+    if prior_20d_return > MOMENTUM_MAX_PCT:
+        return None
 
     # ── Relative strength filter for Defensive book ───────────────────────────
     # Stock's 20d return must exceed Nifty's 20d return (stock is outperforming)
     if book == "F4_DEFENSIVE" and nifty_20d_return is not None:
         if prior_20d_return <= nifty_20d_return:
+            return None
+
+    # ── Bullish candle filter ─────────────────────────────────────────────────
+    # Close must be in the upper half of the day's high-low range.
+    # Ensures the vol spike is happening on buying pressure, not distribution.
+    if "High" in df.columns and "Low" in df.columns:
+        day_high  = float(df["High"].squeeze().iloc[-1])
+        day_low   = float(df["Low"].squeeze().iloc[-1])
+        day_range = day_high - day_low
+        if day_range > 0:
+            close_position = (float(close.iloc[-1]) - day_low) / day_range
+            if close_position < CLOSE_POSITION_MIN:
+                return None
+
+    # ── Close above previous close ────────────────────────────────────────────
+    # Ensures today's price action is directionally up, not a down day with
+    # high volume (which would be distribution / selling pressure).
+    if REQUIRE_CLOSE_ABOVE_PREV and len(close) >= 2:
+        if float(close.iloc[-1]) <= float(close.iloc[-2]):
             return None
 
     # ── ATR-based stop ────────────────────────────────────────────────────────
