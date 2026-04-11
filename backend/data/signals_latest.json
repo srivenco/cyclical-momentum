@@ -1,8 +1,10 @@
 {
-  "date": null,
-  "active_books": [],
-  "total_checked": 0,
+  "date": "2026-04-11",
+  "active_books": [
+    "F4_DEFENSIVE"
+  ],
+  "total_checked": 10,
   "signal_count": 0,
   "signals": [],
-  "generated_at": null
+  "generated_at": "2026-04-11T17:15:56.941304Z"
 }
