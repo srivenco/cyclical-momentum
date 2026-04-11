@@ -74,70 +74,116 @@ const WHEEL_LABEL = {
   'BEAR':           ['BEAR',null],
 };
 
-// Historical sector performance per phase (sourced from cyclical investing research)
+// Historical sector performance per phase
 const HISTORICAL_SECTORS = {
-  // US phases
+  // ── US phases ──────────────────────────────────────────────────────────────
   'RECOVERY': [
-    { name: 'Small Caps',    perf: '+28%', note: 'Lead cycle re-rating' },
-    { name: 'Tech',          perf: '+25%', note: 'Growth re-priced' },
-    { name: 'Financials',    perf: '+22%', note: 'Spread compression' },
-    { name: 'Consumer Disc', perf: '+18%', note: 'Spending bounces' },
+    { name: 'Small Caps',       perf: '+28%', note: 'First to re-rate as credit heals; IWM leads by 3-6 months' },
+    { name: 'AI / Tech',        perf: '+25%', note: 'AI capex supercycle adds secular tailwind on top of cyclical recovery' },
+    { name: 'Financials',       perf: '+22%', note: 'Net interest margin expansion + credit spread compression' },
+    { name: 'Consumer Disc',    perf: '+18%', note: 'Pent-up demand + improving consumer confidence' },
   ],
   'EXPANSION': [
-    { name: 'Financials',    perf: '+18%', note: 'Lending volume up' },
-    { name: 'Industrials',   perf: '+15%', note: 'CapEx cycle peaks' },
-    { name: 'Consumer Disc', perf: '+14%', note: 'Wages & confidence' },
-    { name: 'Materials',     perf: '+12%', note: 'Commodity demand' },
+    { name: 'Financials',       perf: '+18%', note: 'Lending volumes peak; M&A cycle opens up' },
+    { name: 'Industrials',      perf: '+15%', note: 'CapEx cycle in full swing; re-shoring + AI infra buildout' },
+    { name: 'Consumer Disc',    perf: '+14%', note: 'Wages rising, employment full — discretionary spend peaks' },
+    { name: 'Materials',        perf: '+12%', note: 'Commodity demand at peak; copper/steel outperform' },
   ],
   'LATE CYCLE': [
-    { name: 'Energy',        perf: '+22%', note: 'Demand peaks late' },
-    { name: 'Materials',     perf: '+15%', note: 'Real assets bid' },
-    { name: 'Healthcare',    perf: '+8%',  note: 'Defensive rotation' },
-    { name: 'Utilities',     perf: '+4%',  note: 'Early safe-haven' },
+    { name: 'Energy',           perf: '+22%', note: 'Demand highest; supply tight; inflation still running' },
+    { name: 'Materials',        perf: '+15%', note: 'Hard assets outperform paper; gold starts bid' },
+    { name: 'Healthcare',       perf: '+8%',  note: 'Defensive rotation begins; non-cyclical revenue' },
+    { name: 'AI Infra',         perf: 'var.', note: 'Data center power/cooling (VST, CEG) remain bid even late-cycle' },
   ],
   'SLOWDOWN': [
-    { name: 'Healthcare',    perf: '+5%',  note: 'Non-cyclical revenue' },
-    { name: 'Utilities',     perf: '+3%',  note: 'Rate-cut beneficiary' },
-    { name: 'Staples',       perf: '+2%',  note: 'Pricing power holds' },
-    { name: 'Quality Tech',  perf: '0-5%', note: 'Earnings resilience' },
+    { name: 'Healthcare',       perf: '+5%',  note: 'Inelastic demand; earnings resilience; dividend growers' },
+    { name: 'Utilities',        perf: '+3%',  note: 'Rate cut beneficiary; data center power demand adds new floor' },
+    { name: 'Staples',          perf: '+2%',  note: 'Pricing power holds; consumer trades down — volume stable' },
+    { name: 'Quality Tech',     perf: '0-5%', note: 'MSFT/GOOGL AI revenue offsets macro headwind; mid-tier suffers' },
   ],
   'RECESSION': [
-    { name: 'Gold',          perf: '+12%', note: 'Safe haven & real rates' },
-    { name: 'Long Bonds',    perf: '+8%',  note: 'TLT outperforms' },
-    { name: 'Utilities',     perf: '+1%',  note: 'Dividend floor' },
-    { name: 'Cash',          perf: '—',    note: 'Capital preservation' },
+    { name: 'Gold',             perf: '+12%', note: 'Safe haven + falling real rates = double tailwind' },
+    { name: 'Long Bonds (TLT)', perf: '+8%',  note: 'Duration play on Fed pivot; 10Y typically falls 100-150bps' },
+    { name: 'Utilities',        perf: '+1%',  note: 'Dividend floor; but data center power demand adds support' },
+    { name: 'Cash / T-bills',   perf: '—',    note: 'Capital preservation; optionality for recovery re-entry' },
   ],
-  // India phases
+
+  // ── India phases — AI-era aware ────────────────────────────────────────────
   'BULL': [
-    { name: 'Realty',        perf: '+45%', note: 'Leverage + sentiment' },
-    { name: 'Banks',         perf: '+35%', note: 'Credit cycle boom' },
-    { name: 'Auto',          perf: '+28%', note: 'Discretionary spend' },
-    { name: 'Consumer Disc', perf: '+25%', note: 'Premiumisation' },
+    { name: 'Realty',           perf: '+45%', note: 'Highest beta to credit growth; sentiment drives 2-3× fundamentals' },
+    { name: 'Banks',            perf: '+35%', note: 'Credit cycle boom; HDFC Bank, ICICI — clean book + growth' },
+    { name: 'Large-cap IT ★',   perf: '+30%', note: 'AI transformation deal wins (TCS AI.Cloud, Infosys Topaz) add growth on top of USD hedge' },
+    { name: 'Auto',             perf: '+28%', note: 'Discretionary spend peaks; EV transition adds re-rating optionality' },
   ],
   'CAUTIOUS': [
-    { name: 'IT',            perf: '+15%', note: 'USD earnings hedge' },
-    { name: 'FMCG',          perf: '+12%', note: 'Staples + pricing' },
-    { name: 'Quality LargeCap', perf: '+8%', note: 'Low-beta outperform' },
-    { name: 'Healthcare',    perf: '+6%',  note: 'Defensive + exports' },
+    { name: 'Large-cap IT ★',   perf: '+18%', note: 'TCS/Infy/HCL: AI deal pipeline > $10B; USD revenue + INR hedge; outperform in slowdowns' },
+    { name: 'Agile mid-IT ★',   perf: '+15%', note: 'Persistent Systems, LTIMindtree: AI-native revenue > 20% — re-rating story, not just cycle' },
+    { name: 'FMCG',             perf: '+12%', note: 'Volume growth stable; rural recovery adds upside; Nestle, HUL, Dabur' },
+    { name: 'Healthcare',       perf: '+6%',  note: 'Defensive + USFDA-approved export names; Sun Pharma, Dr Reddy' },
   ],
   'CORRECTION': [
-    { name: 'Gold ETFs',     perf: '+15%', note: 'INR hedge' },
-    { name: 'IT (exports)',  perf: '+10%', note: 'Weak rupee tailwind' },
-    { name: 'Pharma (exp)',  perf: '+8%',  note: 'USD export revenue' },
-    { name: 'Cash',          perf: '—',    note: 'Reduce beta' },
+    { name: 'Gold ETFs / SGB',  perf: '+15%', note: 'INR depreciation amplifies gold returns; SGB has tax advantage on maturity' },
+    { name: 'Large-cap IT ★',   perf: '+12%', note: 'TCS, Infosys, HCL — USD revenue + multi-year AI contracts insulate from domestic selloff' },
+    { name: 'Pharma (exports)', perf: '+8%',  note: 'Weak rupee directly lifts USD export revenue; Sun, Dr Reddy, Cipla USFDA pipeline' },
+    { name: 'Cash (20-30%)',    perf: '—',    note: 'Raise dry powder; correction creates entry points in quality names' },
   ],
   'BEAR': [
-    { name: 'Gold',          perf: '+20%', note: 'Crisis safe haven' },
-    { name: 'IT',            perf: '+5%',  note: 'Relative outperform' },
-    { name: 'Pharma',        perf: '+3%',  note: 'Defensive revenue' },
-    { name: 'Cash / FD',     perf: '—',    note: 'Risk-off posture' },
+    { name: 'Gold',             perf: '+20%', note: 'INR weakness + global risk-off = double tailwind; maximum allocation' },
+    { name: 'Large-cap IT ★',   perf: '+8%',  note: 'Relative outperform only — USD revenue + AI deals provide floor, but FII selling caps upside' },
+    { name: 'Pharma',           perf: '+3%',  note: 'Defensive domestic revenue; regulated pricing = earnings visibility' },
+    { name: 'Cash / Liquid FD', perf: '—',    note: 'Risk-off posture; wait for FII flows to turn and Nifty > 50MA' },
   ],
   'RATE CUT CYCLE': [
-    { name: 'Realty',        perf: '+35%', note: 'Rate sensitivity highest' },
-    { name: 'NBFCs',         perf: '+30%', note: 'CoF falls fastest' },
-    { name: 'Banks',         perf: '+25%', note: 'NIM expansion lagged' },
-    { name: 'Auto',          perf: '+20%', note: 'EMI-driven demand' },
+    { name: 'Realty',           perf: '+35%', note: 'Highest rate sensitivity; DLF, Prestige, Oberoi — inventory turns fast when EMIs fall' },
+    { name: 'NBFCs',            perf: '+30%', note: 'Cost of funds falls first; Bajaj Finance, Chola — spread expansion before banks feel it' },
+    { name: 'Banks',            perf: '+25%', note: 'Lagged NIM expansion; HDFC Bank, ICICI — volume + spread improvement cycle' },
+    { name: 'Auto',             perf: '+20%', note: 'EMI-driven demand surge; M&M, Maruti; EV penetration adds structural growth layer' },
   ],
+};
+
+// ── AI structural overlay ─────────────────────────────────────────────────────
+// The AI boom is creating a structural bifurcation within Indian IT that
+// overrides the usual cyclical IT playbook. This overlay is market-regime agnostic.
+const AI_OVERLAY = {
+  headline: 'AI Boom is bifurcating Indian IT',
+  subline: 'Large-cap and AI-native mid-caps structurally outperform; headcount-model firms face disruption risk regardless of cycle phase',
+  winners: [
+    {
+      tier: 'Large-cap AI Winners',
+      color: 'green',
+      stocks: ['TCS', 'Infosys', 'HCL Tech', 'Wipro'],
+      thesis: 'Multi-year AI transformation mega-deals (avg $500M–$2B) insulate from short-cycle headcount pressure. TCS AI.Cloud pipeline >$5B; Infosys Topaz signed 60+ GenAI deals. USD revenue + INR depreciation = double hedge in corrections.',
+      risk: 'Client AI expectations outpacing delivery speed; pricing pressure as AI reduces billed hours per output',
+      action: 'Core holding across ALL India cycle phases',
+    },
+    {
+      tier: 'Agile AI-Native Mid-caps',
+      color: 'blue',
+      stocks: ['Persistent Systems', 'LTIMindtree', 'KPIT Tech', 'Happiest Minds'],
+      thesis: 'Persistent: AI/cloud revenue >20% of mix, growing 40% YoY — pure re-rating story independent of IT cycle. LTIMindtree: AI-led deal wins accelerating. KPIT: EV software + AI niche — secular tailwind. Smaller = more agile on AI transition.',
+      risk: 'Concentrated client exposure; mid-caps sell off harder in corrections despite strong fundamentals',
+      action: 'Overweight in BULL + CAUTIOUS; hold (not add) in CORRECTION; reduce in BEAR',
+    },
+  ],
+  losers: [
+    {
+      tier: 'Headcount-Model Risk',
+      color: 'red',
+      stocks: ['Mid-tier commodity IT', 'BPO-heavy firms', 'Routine-code outsourcing'],
+      thesis: 'Firms with >60% revenue from staff augmentation / routine coding face direct substitution from GitHub Copilot, Cursor, Claude Code. Revenue per head compresses; clients push for output-based pricing. No AI re-rating story.',
+      risk: 'Revenue erosion could be 15-25% over 3-5 years if they don\'t transition to outcome-based models',
+      action: 'Underweight / avoid — structural, not cyclical, headwind',
+    },
+  ],
+  usNote: {
+    headline: 'US AI Capex Supercycle',
+    points: [
+      'Hyperscalers (MSFT, AMZN, GOOGL, META) committing $300B+ combined AI CapEx in 2025 — not cyclical, structural',
+      'NVDA, AVGO (ASICs), MRVL — GPU/accelerator supply chain; pricing power structural through at least 2026',
+      'Nuclear power (CEG, VST) + data center REITs (EQIX, DLR) — AI infrastructure real assets, cycle-resilient',
+      'AI-native SaaS (Palantir, Snowflake, ServiceNow) winning enterprise deals — different risk profile than legacy tech',
+    ],
+  },
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -198,34 +244,89 @@ const NEXT_PHASE_INVESTING = {
 
   // ── India transitions ────────────────────────────────────────────────────────
   'RATE CUT CYCLE→BULL': {
-    start:   ['Banks & NBFCs — credit cycle begins', 'Realty (DLF, Prestige)', 'Auto (M&M, Maruti)', 'Consumer Disc'],
-    reduce:  ['IT — rupee risk as growth returns', 'Defensive Pharma — rotation out'],
-    trigger: 'Nifty > 200MA sustained · FII buying > ₹5,000 Cr/month · Credit growth > 12% YoY',
-    etfs:    ['BANKNIFTY ETF', 'NIFTY REALTY ETF', 'NIFTY AUTO ETF'],
+    start: [
+      'Banks (HDFC Bank, ICICI, Axis) — credit cycle turns; NIM expansion + volume acceleration',
+      'NBFCs (Bajaj Finance, Chola) — CoF falls first; spread expansion before banks catch up',
+      'Realty (DLF, Prestige, Oberoi) — EMI drop → demand surge; inventory absorption fastest here',
+      'Auto (M&M, Maruti) — EMI-driven volume inflection; EV adoption adds structural re-rating layer',
+      'Large-cap IT ★ (TCS, Infosys) — AI deals structural; add on any dip as BULL phase re-rates IT too',
+    ],
+    reduce: [
+      'Gold / SGB — real rates rising as growth accelerates; rupee strengthens on FII inflows',
+      'Defensive Pharma — rotate out as beta preference rises; hold USFDA export names only',
+      'Liquid funds / cash — deploy as market breadth expands and FII flows confirm',
+    ],
+    trigger: 'Nifty > 200MA for 20+ days · FII net buy > ₹8,000 Cr/month sustained · Credit growth > 13% YoY · India VIX < 14',
+    etfs: ['BANKNIFTY ETF', 'NIFTY REALTY ETF', 'NIFTY AUTO ETF', 'NIFTY IT ETF'],
+    note: 'Large-cap IT and AI-native mid-caps (Persistent, LTIMindtree) are structural buys regardless of transition — AI deals do not pause for macro cycles.',
   },
   'BULL→CAUTIOUS': {
-    start:   ['Quality largecaps (HDFC Bank, Infosys, HUL)', 'IT — USD earnings hedge', 'FMCG — defensive'],
-    reduce:  ['Realty — peak valuations', 'Midcap/smallcap — froth forming', 'Leveraged plays'],
-    trigger: 'Nifty PE > 24x · FII flows slowing / turning negative · India VIX > 15 sustained',
-    etfs:    ['NIFTY50 ETF', 'NIFTY IT ETF', 'NIFTY FMCG ETF'],
+    start: [
+      'Large-cap IT ★ (TCS, Infosys, HCL Tech) — AI mega-deal pipeline >$5B; USD + INR hedge; best quality in slowdowns',
+      'AI-native mid-IT ★ (Persistent Systems) — 40%+ AI revenue growth; re-rating independent of Nifty cycle; non-correlated alpha',
+      'FMCG (HUL, Nestle, Dabur) — defensive with pricing power; rural recovery volume upside',
+      'Healthcare (Sun Pharma, Dr Reddy) — USFDA pipeline + USD export revenue; non-cyclical domestic formulations',
+    ],
+    reduce: [
+      'Realty — peak valuations; Nifty Realty PE 40-60× at cycle tops; trim 40-50% of position',
+      'Midcap / smallcap ETFs — froth forming; retail-driven overvaluation compresses during CAUTIOUS phase',
+      'Headcount-model mid-IT — avoid building any new position; AI disruption + cycle slowdown = double headwind',
+      'Consumer Disc discretionary — premiumisation thesis intact but near-term volume softens',
+    ],
+    trigger: 'Nifty PE > 24× · FII monthly flow < ₹3,000 Cr for 2+ months · India VIX rising > 15 · Midcap-to-Nifty ratio > 1.4×',
+    etfs: ['NIFTY IT ETF', 'NIFTY FMCG ETF', 'NIFTY PHARMA ETF', 'NIFTY50 ETF'],
+    note: 'AI era shift: IT is no longer just a defensive play — TCS/Infosys are now GROWTH names in cautious phases due to AI contract wins. Size IT larger than historical playbooks suggest.',
   },
   'CAUTIOUS→CORRECTION': {
-    start:   ['IT (TCS, Infy) — weak INR tailwind', 'Pharma exports (Sun, Dr Reddy)', 'Gold ETFs (SGB, GoldBees)', 'Raise cash'],
-    reduce:  ['Banks — NPA risk rising', 'Realty — rate risk', 'Consumer Disc — demand softens'],
-    trigger: 'Nifty breaks 200MA · FII monthly net sell > ₹10,000 Cr · USDINR > 85 · India VIX > 18',
-    etfs:    ['NIFTY IT ETF', 'NIFTY PHARMA ETF', 'GOLDBEES / SGB'],
+    start: [
+      'Large-cap IT ★ (TCS, Infosys, HCL Tech, Wipro) — add aggressively on dips; INR weakness lifts USD earnings; AI contracts are multi-year, not cancelled in corrections',
+      'Persistent Systems ★ — AI-native, less dependent on headcount; correction = buying opportunity, not business deterioration',
+      'Pharma exports (Sun Pharma, Dr Reddy, Cipla) — USFDA pipeline + USD revenue + weak INR = earnings beat setup',
+      'Gold ETFs / SGB — INR depreciation amplifies gold returns; SGB: 2.5% coupon + tax-free on maturity',
+      'Raise cash to 20-30% — corrections typically -15 to -25%; dry powder for re-entry in quality',
+    ],
+    reduce: [
+      'Banks (especially PSU banks) — NPA cycle risk; credit costs rise; FII selling hits banks first and hardest',
+      'Realty — exit remaining position; rate risk + FII selling + sentiment collapse = worst performer in corrections',
+      'Consumer Disc — demand compression as sentiment falls; avoid leveraged consumer plays',
+      'Mid/smallcap IT with headcount model — business AND cycle headwind simultaneously; 25-40% drawdown risk',
+    ],
+    trigger: 'Nifty breaks 200MA on volume · FII sell > ₹12,000 Cr in a month · USDINR > 85.5 · India VIX > 18 · BankNifty underperforms Nifty by 5%+ in 1M',
+    etfs: ['NIFTY IT ETF', 'NIFTY PHARMA ETF', 'GOLDBEES', 'NIFTY 50 ETF (reduce)'],
+    note: '★ Critical: During corrections, large-cap IT bifurcates sharply from mid-tier. TCS/Infosys fall 10-15% but recover fastest; headcount-heavy mid-tiers fall 25-40% and recover slowly due to structural AI headwind on top of cyclical pressure.',
   },
   'CORRECTION→BEAR': {
-    start:   ['Gold — maximum allocation', 'IT (hold)', 'Cash / liquid funds', 'Short beta (avoid mid/small)'],
-    reduce:  ['All cyclicals: Banks, Auto, Realty, Infra', 'Midcap/smallcap index exposure'],
-    trigger: 'Nifty -15% from peak · Sustained FII outflow · Global risk-off (VIX > 30) · INR > 87',
-    etfs:    ['GOLDBEES', 'LIQUID FUND', 'NIFTY IT ETF'],
+    start: [
+      'Gold (25-35% of portfolio) — INR + global risk-off + falling real rates = triple tailwind; no better asset in bear markets',
+      'Large-cap IT ★ (hold; do not add) — USD floor from AI contracts but FII outflows cap upside; only add TCS/Infy on -20%+ dips',
+      'Cash / liquid funds (30-40%) — T-bill rates elevated; generate return while waiting; preserve optionality for re-entry',
+      'Short-duration debt — park in 1-3Y GSecs or overnight liquid funds; avoid duration risk until RBI signals cuts',
+    ],
+    reduce: [
+      'All cyclicals immediately — Banks, Realty, Auto, Infra, Consumer Disc all fall 30-50% in full bear markets',
+      'Midcap/smallcap index — indiscriminate selling; mid-tier IT faces AI disruption + FII selling + margin compression simultaneously',
+      'Pharma domestic — hold exports only; domestic pricing regulation + volume slowdown in bears',
+      'Any leveraged / high-PE position — multiple compression is most severe; exit before market confirms bear',
+    ],
+    trigger: 'Nifty -15% from 52-week high · FII cumulative outflow > ₹50,000 Cr in 3 months · USDINR > 87 · Global VIX > 28 · India VIX > 22',
+    etfs: ['GOLDBEES / NIPPON GOLD ETF', 'LIQUID BEES', 'NIFTY IT ETF (hold only)'],
+    note: 'India bear markets average -30 to -45% peak-to-trough over 8-18 months. Large-cap IT relative performance is +15 to +25% vs Nifty in bears — but absolute returns still negative. AI pipeline provides a floor, not immunity.',
   },
   'BEAR→RATE CUT CYCLE': {
-    start:   ['Banks & NBFCs — rate-sensitive first movers', 'Realty (DLF, Oberoi)', 'Auto — EMI demand', 'Consumer (discretionary)'],
-    reduce:  ['Gold — real rates rising', 'IT — INR strengthens with inflows'],
-    trigger: 'RBI first rate cut · FII flows turn positive · Nifty > 50MA · India VIX < 16',
-    etfs:    ['BANKNIFTY ETF', 'NIFTY REALTY ETF', 'NIFTY AUTO ETF'],
+    start: [
+      'Banks & NBFCs — accumulate HDFC Bank (PB < 1.5×), Bajaj Finance at distressed valuations; rate-sensitive recover earliest',
+      'Realty (DLF, Prestige, Oberoi) — position 6-9 months before rate cut announcement; real estate bottoms early in rate cycle',
+      'Auto (M&M, Maruti) — pre-position before volume inflection; EV adds structural re-rating on top of rate-cut demand tailwind',
+      'Large-cap IT ★ — add to existing position; AI deals continue; as INR stabilises with FII inflows, earnings upgrade cycle begins',
+    ],
+    reduce: [
+      'Gold — real rates rising on rate cut expectations; reduce by 50% of peak position; keep 10-15% core structural allocation',
+      'Cash — start deploying systematically over 3-6 months; SIP-style as signals confirm rather than lump sum',
+      'Long-duration debt — rate cut already priced in; duration risk rises as yields stabilise and then normalise',
+    ],
+    trigger: 'RBI MPC votes to cut (or explicitly signals) · FII net buy for 2 consecutive months · Nifty > 50MA · India VIX < 16 · USDINR < 84',
+    etfs: ['BANKNIFTY ETF', 'NIFTY REALTY ETF', 'NIFTY AUTO ETF', 'NIFTY IT ETF'],
+    note: '★ AI overlay: As India transitions to rate cut cycle, large-cap IT gets double tailwind — AI deal momentum continues AND domestic recovery brings broader re-rating. LTIMindtree, Persistent Systems historically see 40-60% returns from bear lows into early bull.',
   },
 };
 
@@ -545,6 +646,123 @@ function FIIDIIPanel({ fiiDii }) {
 }
 
 // ── Cycle wheel SVG ───────────────────────────────────────────────────────────
+// ── AI Overlay panel ──────────────────────────────────────────────────────────
+function AiOverlayPanel({ market }) {
+  const [expanded, setExpanded] = useState(false);
+  const overlay = market === 'India' ? AI_OVERLAY : null;
+  if (!overlay) return null; // US overlay is shown inline in suggestions
+
+  return (
+    <div style={{
+      margin: '0', borderTop: `1px solid ${C.border}`,
+      background: 'linear-gradient(135deg, rgba(167,139,250,0.05) 0%, rgba(0,180,216,0.03) 100%)',
+    }}>
+      {/* Header — always visible */}
+      <button
+        onClick={() => setExpanded(v => !v)}
+        style={{
+          width: '100%', textAlign: 'left', padding: '10px 16px',
+          background: 'none', border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{
+            fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 4,
+            backgroundColor: 'rgba(167,139,250,0.2)', color: C.purple,
+            border: '1px solid rgba(167,139,250,0.4)', letterSpacing: '0.06em',
+          }}>AI</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: C.purple }}>
+            {overlay.headline}
+          </span>
+        </div>
+        <span style={{ fontSize: 10, color: C.muted }}>{expanded ? '▲' : '▼'}</span>
+      </button>
+      <div style={{ fontSize: 10, color: C.muted, padding: '0 16px 8px', lineHeight: 1.4 }}>
+        {overlay.subline}
+      </div>
+
+      {/* Expanded detail */}
+      {expanded && (
+        <div style={{ padding: '0 16px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+          {/* Winners */}
+          {overlay.winners.map((tier, i) => (
+            <div key={i} style={{
+              padding: '10px 12px', borderRadius: 8,
+              backgroundColor: tier.color === 'green' ? 'rgba(34,197,94,0.06)' : 'rgba(0,180,216,0.06)',
+              border: `1px solid ${tier.color === 'green' ? 'rgba(34,197,94,0.2)' : 'rgba(0,180,216,0.2)'}`,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+                <span style={{
+                  fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 3,
+                  backgroundColor: tier.color === 'green' ? 'rgba(34,197,94,0.2)' : 'rgba(0,180,216,0.2)',
+                  color: tier.color === 'green' ? C.green : C.blue,
+                }}>★ BUY</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>{tier.tier}</span>
+              </div>
+              {/* Stock tags */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
+                {tier.stocks.map((s, j) => (
+                  <span key={j} style={{
+                    fontSize: 10, padding: '2px 7px', borderRadius: 4, fontWeight: 600,
+                    backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.85)',
+                    border: `1px solid ${C.border}`,
+                  }}>{s}</span>
+                ))}
+              </div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, marginBottom: 4 }}>
+                {tier.thesis}
+              </div>
+              <div style={{ fontSize: 9, color: C.amber, lineHeight: 1.4 }}>
+                ⚠ Risk: {tier.risk}
+              </div>
+              <div style={{
+                fontSize: 9, fontWeight: 700, marginTop: 5,
+                color: tier.color === 'green' ? C.green : C.blue,
+              }}>
+                → {tier.action}
+              </div>
+            </div>
+          ))}
+
+          {/* Losers */}
+          {overlay.losers.map((tier, i) => (
+            <div key={i} style={{
+              padding: '10px 12px', borderRadius: 8,
+              backgroundColor: 'rgba(239,68,68,0.06)',
+              border: '1px solid rgba(239,68,68,0.2)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+                <span style={{
+                  fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 3,
+                  backgroundColor: 'rgba(239,68,68,0.2)', color: C.red,
+                }}>✕ AVOID</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>{tier.tier}</span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 6 }}>
+                {tier.stocks.map((s, j) => (
+                  <span key={j} style={{
+                    fontSize: 10, padding: '2px 7px', borderRadius: 4, fontWeight: 600,
+                    backgroundColor: 'rgba(239,68,68,0.08)', color: 'rgba(255,255,255,0.75)',
+                    border: '1px solid rgba(239,68,68,0.2)',
+                  }}>{s}</span>
+                ))}
+              </div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, marginBottom: 4 }}>
+                {tier.thesis}
+              </div>
+              <div style={{ fontSize: 9, color: C.red, lineHeight: 1.4, fontWeight: 600 }}>
+                → {tier.action}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CycleWheel({ phases, currentPhase }) {
   const size = 220;
   const cx = 110, cy = 110;
@@ -941,7 +1159,7 @@ function CycleScorecardPanel({ cycle, market }) {
           {/* Trigger to confirm transition */}
           {nextInvesting.trigger && (
             <div style={{
-              padding: '8px 12px', borderRadius: 7,
+              padding: '8px 12px', borderRadius: 7, marginBottom: 8,
               backgroundColor: `${nextColor}0d`,
               border: `1px solid ${nextColor}30`,
             }}>
@@ -954,8 +1172,28 @@ function CycleScorecardPanel({ cycle, market }) {
               </div>
             </div>
           )}
+
+          {/* Analyst note */}
+          {nextInvesting.note && (
+            <div style={{
+              padding: '8px 12px', borderRadius: 7,
+              backgroundColor: 'rgba(167,139,250,0.06)',
+              border: '1px solid rgba(167,139,250,0.2)',
+            }}>
+              <div style={{ fontSize: 9, color: C.purple, fontWeight: 700,
+                            textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
+                ★ Analyst Note
+              </div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.75)', lineHeight: 1.5 }}>
+                {nextInvesting.note}
+              </div>
+            </div>
+          )}
         </div>
       )}
+
+      {/* ── AI structural overlay (India only) ── */}
+      <AiOverlayPanel market={market} />
     </div>
   );
 }
