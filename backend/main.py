@@ -39,6 +39,21 @@ app.add_middleware(
 
 DATA_DIR = Path(__file__).parent / "data"
 PORTFOLIO_FILE = DATA_DIR / "portfolio.json"
+SETTINGS_FILE = DATA_DIR / "settings.json"
+
+
+# ── Settings helpers ──────────────────────────────────────────────────────────
+def _load_settings() -> dict:
+    if SETTINGS_FILE.exists():
+        with open(SETTINGS_FILE) as f:
+            return json.load(f)
+    return {"capital": None, "risk_pct": 2.0, "alert_email": None}
+
+
+def _save_settings(s: dict):
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(SETTINGS_FILE, "w") as f:
+        json.dump(s, f, indent=2)
 
 
 # ── Portfolio helpers ─────────────────────────────────────────────────────────
@@ -82,6 +97,12 @@ class ExitRequest(BaseModel):
     exit_date: Optional[str] = None
 
 
+class SettingsRequest(BaseModel):
+    capital: Optional[float] = None
+    risk_pct: Optional[float] = 2.0
+    alert_email: Optional[str] = None
+
+
 # ── Auth ──────────────────────────────────────────────────────────────────────
 @app.post("/auth/login", response_model=TokenResponse)
 def login(body: LoginRequest):
@@ -109,6 +130,25 @@ def run_scan(request: Request):
     import threading
     threading.Thread(target=run_daily_job, daemon=True).start()
     return {"status": "scan started", "timestamp": datetime.utcnow().isoformat() + "Z"}
+
+
+# ── Settings ─────────────────────────────────────────────────────────────────
+@app.get("/api/settings")
+def get_settings(user=Depends(get_current_user)):
+    return _load_settings()
+
+
+@app.post("/api/settings")
+def save_settings(body: SettingsRequest, user=Depends(get_current_user)):
+    settings = _load_settings()
+    if body.capital is not None:
+        settings["capital"] = body.capital
+    if body.risk_pct is not None:
+        settings["risk_pct"] = body.risk_pct
+    if body.alert_email is not None:
+        settings["alert_email"] = body.alert_email
+    _save_settings(settings)
+    return settings
 
 
 # ── Macro ─────────────────────────────────────────────────────────────────────
