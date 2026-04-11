@@ -70,3 +70,15 @@ export const getMacroHistory = () =>
 export const getNiftyBenchmark = (startDate) =>
   fetch(`${BASE_URL}/api/nifty/benchmark${startDate ? `?start_date=${startDate}` : ''}`,
     { headers: getHeaders() }).then(handleResponse);
+
+export const getQualityWatchlist = () =>
+  fetch(`${BASE_URL}/api/quality/watchlist`, { headers: getHeaders() }).then(handleResponse);
+
+export const refreshQualityCache = () =>
+  fetch(`${BASE_URL}/api/quality/refresh-cache`, {
+    method: 'POST',
+    headers: getHeaders(),
+  }).then(handleResponse);
+
+export const getLtcgStatus = (tradeId) =>
+  fetch(`${BASE_URL}/api/quality/ltcg/${tradeId}`, { headers: getHeaders() }).then(handleResponse);

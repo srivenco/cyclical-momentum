@@ -20,6 +20,10 @@ from auth import (LoginRequest, TokenResponse, create_access_token,
                   get_current_user, verify_password)
 from macro import load_macro_state, load_macro_history
 from signals import load_signals_history, load_signals_latest, load_warming_up
+from quality_momentum import (
+    get_quality_data, refresh_quality_cache, load_quality_cache,
+    compute_ltcg_status,
+)
 
 load_dotenv()
 
@@ -319,6 +323,47 @@ def record_exit(body: ExitRequest, user=Depends(get_current_user)):
     _mark_history_exit(trade)
 
     return trade
+
+
+# ── Quality Momentum ─────────────────────────────────────────────────────────
+
+@app.get("/api/quality/watchlist")
+def get_quality_watchlist(user=Depends(get_current_user)):
+    """
+    Returns ranked quality-momentum watchlist + any active vol-crossover signals.
+    Reads from cache; does NOT trigger a live scrape (use /refresh for that).
+    """
+    return get_quality_data()
+
+
+@app.post("/api/quality/refresh-cache")
+def refresh_quality(user=Depends(get_current_user)):
+    """
+    Trigger a fresh Screener.in scrape for all quality universe tickers.
+    This is slow (~2 min for 90 stocks) — run it once a week via scheduler.
+    """
+    import threading
+    def _bg():
+        refresh_quality_cache(force=True)
+    threading.Thread(target=_bg, daemon=True).start()
+    return {"status": "cache refresh started — check back in ~2 minutes"}
+
+
+@app.get("/api/quality/ltcg/{trade_id}")
+def get_ltcg_status(trade_id: str, user=Depends(get_current_user)):
+    """Return LTCG tax status for a specific open trade."""
+    portfolio = _load_portfolio()
+    trade = next((t for t in portfolio["trades"] if t["id"] == trade_id), None)
+    if not trade:
+        raise HTTPException(status_code=404, detail="Trade not found")
+    if trade["status"] != "open":
+        return {"error": "Trade is closed"}
+
+    current = _fetch_current_price(trade["ticker"])
+    if current is None:
+        raise HTTPException(status_code=503, detail="Could not fetch current price")
+
+    return compute_ltcg_status(trade["entry_date"], trade["entry_price"], current)
 
 
 def _mark_history_exit(trade: dict):

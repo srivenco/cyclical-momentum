@@ -6,6 +6,7 @@ import EquityCurve from './EquityCurve';
 import MacroDetail from './MacroDetail';
 import SignalHistory from './SignalHistory';
 import CapitalSettings from './CapitalSettings';
+import QualityMomentum from './QualityMomentum';
 import { useCapital } from '../hooks/useCapital';
 import { getPortfolio } from '../api';
 
@@ -32,6 +33,7 @@ function useRiskMeter() {
 
 const TABS = [
   { id: 'signals',     label: 'Signals' },
+  { id: 'quality',     label: '✦ Quality' },
   { id: 'history',     label: 'History' },
   { id: 'portfolio',   label: 'Portfolio' },
   { id: 'macro',       label: 'Macro Regime' },
@@ -131,6 +133,7 @@ export default function Dashboard({ onLogout }) {
 
           <div className="flex-1 overflow-y-auto p-4">
             {activeTab === 'signals'     && <SignalFeed />}
+            {activeTab === 'quality'     && <QualityMomentum />}
             {activeTab === 'history'     && <SignalHistory />}
             {activeTab === 'portfolio'   && <PortfolioSummary />}
             {activeTab === 'macro'       && <MacroDetail />}
