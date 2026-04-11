@@ -34,10 +34,13 @@ STOP_FALLBACK_PCT         = 0.07
 MOMENTUM_FILTER_PCT       = 0.05
 MOMENTUM_FILTER_DEFENSIVE = 0.03
 COOLDOWN_DAYS             = 30
+SIGNAL_REENTRY_DAYS       = 7    # don't re-enter same ticker within 7 days of any signal
 SEASONAL_EXCLUDE_MONTHS   = [1, 2]
 MA_FILTER_STANDARD        = 50
 MA_FILTER_DEFENSIVE       = 20
 CROSSOVER_WINDOW_DAYS     = 3
+CLOSE_POSITION_MIN        = 0.50  # close must be in upper half of day's range
+REQUIRE_CLOSE_ABOVE_PREV  = True  # close today > close yesterday
 
 # ── Universe (identical to signals.py) ───────────────────────────────────────
 COMMODITY_BOOK = {
@@ -176,6 +179,21 @@ def _check_signal(df_full, ticker, book, sector, threshold, check_date, nifty_20
         if ret20 <= nifty_20d_return:
             return None
 
+    # ── Bullish candle: close in upper half of day's range ────────────────────
+    if "High" in df.columns and "Low" in df.columns:
+        day_high  = float(df["High"].squeeze().iloc[-1])
+        day_low_v = float(df["Low"].squeeze().iloc[-1])
+        day_range = day_high - day_low_v
+        if day_range > 0:
+            close_pos = (float(close.iloc[-1]) - day_low_v) / day_range
+            if close_pos < CLOSE_POSITION_MIN:
+                return None
+
+    # ── Close above previous close (no down-day entries) ─────────────────────
+    if REQUIRE_CLOSE_ABOVE_PREV and len(df) >= 2:
+        if float(close.iloc[-1]) <= float(close.iloc[-2]):
+            return None
+
     entry_price  = float(close.iloc[-1])
     initial_stop = _calc_atr_stop(df, entry_price)
     if initial_stop >= entry_price:
@@ -288,9 +306,15 @@ def main():
         # Cooldown set from signals generated so far
         cooldown_set = set()
         for sig in all_signals:
+            # 30-day cooldown after stop exit
             if sig.get("exit_reason") == "stop" and sig.get("exit_date"):
                 exit_dt = date.fromisoformat(sig["exit_date"])
                 if (check_date - exit_dt).days <= COOLDOWN_DAYS:
+                    cooldown_set.add(sig["ticker"])
+            # 7-day re-entry cooldown after ANY signal
+            if sig.get("date"):
+                sig_dt = date.fromisoformat(sig["date"])
+                if 0 <= (check_date - sig_dt).days <= SIGNAL_REENTRY_DAYS:
                     cooldown_set.add(sig["ticker"])
 
         # Nifty 20d return for Defensive relative-strength filter

@@ -26,9 +26,20 @@ const C = {
   green:   '#22c55e',
   red:     '#ef4444',
   amber:   '#f59e0b',
+  orange:  '#f97316',
   purple:  '#a78bfa',
   muted:   '#4a6080',
   dim:     '#2a4060',
+};
+
+const PHASE_COLORS = {
+  green:  C.green,
+  amber:  C.amber,
+  orange: C.orange,
+  red:    C.red,
+  blue:   C.blue,
+  purple: C.purple,
+  muted:  C.muted,
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -51,10 +62,17 @@ const trend = (above) => {
     : <span style={{ color: C.red,   fontSize: 10 }}>▼ 200MA</span>;
 };
 
+const fmtCr = (n) => {
+  if (n == null) return '—';
+  const abs = Math.abs(n);
+  const s = abs >= 1000 ? `₹${(abs / 1000).toFixed(1)}K Cr` : `₹${abs.toFixed(0)} Cr`;
+  return n >= 0 ? `+${s}` : `-${s}`;
+};
+
 // ── Sparkline ─────────────────────────────────────────────────────────────────
-function Spark({ data = [], positive }) {
+function Spark({ data = [], positive, width = 60, height = 24 }) {
   if (!data.length) return null;
-  const w = 60, h = 24, pad = 2;
+  const w = width, h = height, pad = 2;
   const pts = data.map((v, i) => {
     const x = pad + (i / (data.length - 1)) * (w - pad * 2);
     const y = h - pad - (v / 100) * (h - pad * 2);
@@ -74,6 +92,7 @@ function RegimeBadge({ label, color = 'blue' }) {
     green:  [C.green,  'rgba(34,197,94,0.12)',  'rgba(34,197,94,0.25)'],
     red:    [C.red,    'rgba(239,68,68,0.12)',   'rgba(239,68,68,0.25)'],
     amber:  [C.amber,  'rgba(245,158,11,0.12)',  'rgba(245,158,11,0.25)'],
+    orange: [C.orange, 'rgba(249,115,22,0.12)',  'rgba(249,115,22,0.25)'],
     blue:   [C.blue,   'rgba(0,180,216,0.12)',   'rgba(0,180,216,0.25)'],
     purple: [C.purple, 'rgba(167,139,250,0.12)', 'rgba(167,139,250,0.25)'],
     muted:  [C.muted,  'rgba(74,96,128,0.12)',   'rgba(74,96,128,0.25)'],
@@ -94,13 +113,14 @@ function TickerBar({ data }) {
     ...(data?.india_macro  || []).filter(d => ['nifty','banknifty','usdinr','india_vix'].includes(d.key)),
     ...(data?.commodities  || []).filter(d => ['crude_wti','gold','copper'].includes(d.key)),
     ...(data?.global_macro || []).filter(d => ['us10y','vix','dxy'].includes(d.key)),
+    ...(data?.global_equities || []).filter(d => ['sp500','nasdaq'].includes(d.key)),
   ];
 
   return (
     <div className="flex items-center gap-0 overflow-x-auto shrink-0"
          style={{ backgroundColor: C.surface, borderBottom: `1px solid ${C.border}`,
                   height: 36 }}>
-      {items.map((item, i) => (
+      {items.map((item) => (
         <div key={item.key}
              className="flex items-center gap-2 px-4 shrink-0"
              style={{ borderRight: `1px solid ${C.border2}`, height: '100%' }}>
@@ -127,19 +147,14 @@ function CommodityRow({ item }) {
   return (
     <div className="flex items-center gap-3 py-3 px-4"
          style={{ borderBottom: `1px solid ${C.border2}` }}>
-      {/* Name + unit */}
       <div style={{ width: 120, flexShrink: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>{item.name}</div>
         <div style={{ fontSize: 10, color: C.muted }}>{item.unit}</div>
       </div>
-
-      {/* Price */}
       <div style={{ width: 90, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'white' }}>{price(item.price)}</div>
         <div style={{ fontSize: 11 }}>{pct(item.change_1d)}</div>
       </div>
-
-      {/* Returns */}
       <div className="flex gap-4 flex-1" style={{ justifyContent: 'flex-end' }}>
         {[['1W', item.change_1w], ['1M', item.change_1m], ['3M', item.change_3m], ['YTD', item.ytd]].map(([label, val]) => (
           <div key={label} style={{ textAlign: 'right', minWidth: 48 }}>
@@ -148,8 +163,6 @@ function CommodityRow({ item }) {
           </div>
         ))}
       </div>
-
-      {/* 200MA status */}
       <div style={{ width: 72, textAlign: 'center' }}>
         {item.above_200ma != null && (
           <span style={{
@@ -162,8 +175,6 @@ function CommodityRow({ item }) {
           </span>
         )}
       </div>
-
-      {/* Sparkline */}
       <div style={{ width: 64, flexShrink: 0 }}>
         <Spark data={item.sparkline || []} positive={up} />
       </div>
@@ -197,6 +208,317 @@ function MacroStat({ item, highlight }) {
   );
 }
 
+// ── Global equity card ────────────────────────────────────────────────────────
+const REGION_COLORS = { US: C.blue, Asia: C.purple, Europe: C.amber, EM: C.orange };
+
+function GlobalEquityCard({ item }) {
+  const up1d = (item.change_1d ?? 0) >= 0;
+  const up1m = (item.change_1m ?? 0) >= 0;
+  const regionColor = REGION_COLORS[item.region] || C.muted;
+  return (
+    <div className="rounded-xl p-3"
+         style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
+      <div className="flex items-start justify-between mb-1">
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'white' }}>{item.name}</div>
+          <div style={{ fontSize: 10, color: regionColor, marginTop: 1 }}>{item.region}</div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+          {item.above_200ma != null && (
+            <span style={{
+              fontSize: 9, fontWeight: 700, padding: '1px 5px', borderRadius: 3,
+              backgroundColor: item.above_200ma ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+              color: item.above_200ma ? C.green : C.red,
+              border: `1px solid ${item.above_200ma ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+            }}>
+              {item.above_200ma ? '▲' : '▼'} 200MA
+            </span>
+          )}
+        </div>
+      </div>
+      <div style={{ fontSize: 18, fontWeight: 700, color: 'white', fontVariantNumeric: 'tabular-nums', marginTop: 4 }}>
+        {price(item.price)}
+      </div>
+      <div className="flex gap-3 mt-1">
+        <div style={{ fontSize: 11 }}>{pct(item.change_1d)} 1D</div>
+        <div style={{ fontSize: 11 }}>{pct(item.change_1m)} 1M</div>
+        {item.ytd != null && <div style={{ fontSize: 11 }}>{pct(item.ytd)} YTD</div>}
+      </div>
+      <div className="mt-2">
+        <Spark data={item.sparkline || []} positive={up1m} width={80} height={20} />
+      </div>
+    </div>
+  );
+}
+
+// ── Macro ratio card ──────────────────────────────────────────────────────────
+function MacroRatioCard({ ratio }) {
+  const color = ratio.signal_color || 'muted';
+  const fgColor = PHASE_COLORS[color] || C.muted;
+  const bgColor = color === 'green'  ? 'rgba(34,197,94,0.06)'
+                : color === 'red'    ? 'rgba(239,68,68,0.06)'
+                : color === 'amber'  ? 'rgba(245,158,11,0.06)'
+                : color === 'blue'   ? 'rgba(0,180,216,0.06)'
+                : 'rgba(74,96,128,0.06)';
+  const borderColor = color === 'green'  ? 'rgba(34,197,94,0.2)'
+                    : color === 'red'    ? 'rgba(239,68,68,0.2)'
+                    : color === 'amber'  ? 'rgba(245,158,11,0.2)'
+                    : color === 'blue'   ? 'rgba(0,180,216,0.2)'
+                    : C.border;
+
+  return (
+    <div className="rounded-xl p-4 flex flex-col gap-2"
+         style={{ backgroundColor: bgColor, border: `1px solid ${borderColor}` }}>
+      <div className="flex items-center justify-between">
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'white' }}>{ratio.name}</div>
+        <span style={{
+          fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+          backgroundColor: ratio.rising ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+          color: ratio.rising ? C.green : C.red,
+        }}>
+          {ratio.rising ? '▲ Rising' : '▼ Falling'}
+        </span>
+      </div>
+
+      <div style={{ fontSize: 20, fontWeight: 700, color: 'white', fontVariantNumeric: 'tabular-nums' }}>
+        {ratio.value?.toFixed(ratio.key === 'dxy_crude' ? 2 : 4) ?? '—'}
+      </div>
+
+      <div className="flex gap-3">
+        <div style={{ fontSize: 11 }}>{pct(ratio.change_1m)} 1M</div>
+        <div style={{ fontSize: 11 }}>{pct(ratio.change_3m)} 3M</div>
+      </div>
+
+      <div style={{
+        fontSize: 11, color: fgColor, lineHeight: 1.4,
+        borderTop: `1px solid ${borderColor}`, paddingTop: 8, marginTop: 2,
+      }}>
+        {ratio.signal}
+      </div>
+    </div>
+  );
+}
+
+// ── FII/DII flows panel ───────────────────────────────────────────────────────
+function FIIDIIPanel({ fiiDii }) {
+  if (!fiiDii || fiiDii.length === 0) {
+    return (
+      <div className="rounded-xl p-4"
+           style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'white', marginBottom: 8 }}>FII / DII Flows</div>
+        <div style={{ fontSize: 12, color: C.muted }}>No data — NSE scrape unavailable</div>
+      </div>
+    );
+  }
+
+  const fii = fiiDii.find(r => r.category?.toUpperCase().includes('FII') || r.category?.toUpperCase().includes('FPI'));
+  const dii = fiiDii.find(r => r.category?.toUpperCase().includes('DII'));
+  const date = fii?.date || dii?.date || '';
+
+  const FlowRow = ({ label, data, color }) => {
+    if (!data) return null;
+    return (
+      <div className="rounded-lg p-3" style={{ backgroundColor: C.surface, border: `1px solid ${C.border}` }}>
+        <div className="flex items-center justify-between mb-2">
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>{label}</div>
+          <div style={{
+            fontSize: 13, fontWeight: 700, color,
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {fmtCr(data.net)}
+          </div>
+        </div>
+        <div className="flex gap-4">
+          <div>
+            <div style={{ fontSize: 9, color: C.muted }}>BUY</div>
+            <div style={{ fontSize: 11, color: C.green, fontVariantNumeric: 'tabular-nums' }}>
+              ₹{(data.buy / 1000).toFixed(1)}K Cr
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 9, color: C.muted }}>SELL</div>
+            <div style={{ fontSize: 11, color: C.red, fontVariantNumeric: 'tabular-nums' }}>
+              ₹{(data.sell / 1000).toFixed(1)}K Cr
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="rounded-xl overflow-hidden"
+         style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
+      <div className="px-4 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>FII / DII Flows</div>
+        {date && <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>Cash market · {date}</div>}
+      </div>
+      <div className="p-4 flex flex-col gap-3">
+        <FlowRow
+          label="FII / FPI"
+          data={fii}
+          color={fii?.net >= 0 ? C.green : C.red}
+        />
+        <FlowRow
+          label="DII"
+          data={dii}
+          color={dii?.net >= 0 ? C.green : C.red}
+        />
+        {fii && dii && (
+          <div style={{ fontSize: 10, color: C.muted, textAlign: 'center', paddingTop: 4 }}>
+            Net combined:{' '}
+            <span style={{ color: (fii.net + dii.net) >= 0 ? C.green : C.red, fontWeight: 700 }}>
+              {fmtCr(fii.net + dii.net)}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Cycle scorecard panel ─────────────────────────────────────────────────────
+function CycleScorecardPanel({ cycle, market }) {
+  if (!cycle) return null;
+
+  const phaseColor = PHASE_COLORS[cycle.color] || C.muted;
+  const bgGlow = cycle.color === 'green'  ? 'rgba(34,197,94,0.04)'
+               : cycle.color === 'red'    ? 'rgba(239,68,68,0.04)'
+               : cycle.color === 'amber'  ? 'rgba(245,158,11,0.04)'
+               : cycle.color === 'orange' ? 'rgba(249,115,22,0.04)'
+               : cycle.color === 'blue'   ? 'rgba(0,180,216,0.04)'
+               : 'transparent';
+  const borderGlow = cycle.color === 'green'  ? 'rgba(34,197,94,0.25)'
+                   : cycle.color === 'red'    ? 'rgba(239,68,68,0.25)'
+                   : cycle.color === 'amber'  ? 'rgba(245,158,11,0.25)'
+                   : cycle.color === 'orange' ? 'rgba(249,115,22,0.25)'
+                   : cycle.color === 'blue'   ? 'rgba(0,180,216,0.25)'
+                   : C.border;
+
+  // Score bar: 0-100
+  const score = cycle.score_pct ?? 50;
+  const barColor = score >= 65 ? C.green
+                 : score >= 50 ? C.amber
+                 : score >= 35 ? C.orange
+                 : C.red;
+
+  return (
+    <div className="rounded-xl overflow-hidden flex flex-col"
+         style={{ backgroundColor: bgGlow, border: `1px solid ${borderGlow}` }}>
+
+      {/* Header */}
+      <div className="px-4 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+        <div className="flex items-center justify-between">
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>
+            {market} Cycle Scorecard
+          </div>
+          <RegimeBadge label={cycle.phase} color={cycle.color} />
+        </div>
+        <div style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>{cycle.description}</div>
+
+        {/* Score bar */}
+        <div className="mt-3">
+          <div className="flex items-center justify-between mb-1">
+            <span style={{ fontSize: 9, color: C.muted }}>BEAR</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: barColor }}>{score}% Bullish</span>
+            <span style={{ fontSize: 9, color: C.muted }}>BULL</span>
+          </div>
+          <div style={{ height: 6, backgroundColor: C.dim, borderRadius: 3, overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', borderRadius: 3,
+              width: `${score}%`,
+              backgroundColor: barColor,
+              transition: 'width 0.5s ease',
+            }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Signal matrix */}
+      <div style={{ padding: '12px 16px', borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: C.muted,
+                      textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+          Signal Matrix
+        </div>
+        <div className="flex flex-col gap-1">
+          {(cycle.signals || []).map((sig, i) => (
+            <div key={i} className="flex items-center gap-2 py-1"
+                 style={{ borderBottom: `1px solid ${C.border2}` }}>
+              <div style={{
+                width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                backgroundColor: sig.bullish === true  ? C.green
+                               : sig.bullish === false ? C.red
+                               : C.muted,
+              }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: 'white' }}>{sig.label}</div>
+                <div style={{ fontSize: 10, color: C.muted, lineHeight: 1.3, marginTop: 1 }}>{sig.reading}</div>
+              </div>
+              {sig.weight > 1 && (
+                <div style={{ fontSize: 9, color: C.dim, flexShrink: 0 }}>×{sig.weight}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Sector playbook */}
+      <div style={{ padding: '12px 16px' }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: C.muted,
+                      textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+          Sector Playbook
+        </div>
+        <div className="flex flex-col gap-3">
+          <div>
+            <div style={{ fontSize: 10, color: C.green, fontWeight: 600, marginBottom: 4 }}>
+              ▲ Overweight
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {(cycle.overweight || []).map((s, i) => (
+                <span key={i} style={{
+                  fontSize: 10, padding: '2px 6px', borderRadius: 4,
+                  backgroundColor: 'rgba(34,197,94,0.1)',
+                  color: C.green, border: '1px solid rgba(34,197,94,0.2)',
+                }}>{s}</span>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: 10, color: C.red, fontWeight: 600, marginBottom: 4 }}>
+              ▼ Underweight
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {(cycle.underweight || []).map((s, i) => (
+                <span key={i} style={{
+                  fontSize: 10, padding: '2px 6px', borderRadius: 4,
+                  backgroundColor: 'rgba(239,68,68,0.1)',
+                  color: C.red, border: '1px solid rgba(239,68,68,0.2)',
+                }}>{s}</span>
+              ))}
+            </div>
+          </div>
+          {cycle.watch?.length > 0 && (
+            <div>
+              <div style={{ fontSize: 10, color: C.amber, fontWeight: 600, marginBottom: 4 }}>
+                ◉ Watch
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {cycle.watch.map((s, i) => (
+                  <span key={i} style={{
+                    fontSize: 10, padding: '2px 6px', borderRadius: 4,
+                    backgroundColor: 'rgba(245,158,11,0.1)',
+                    color: C.amber, border: '1px solid rgba(245,158,11,0.2)',
+                  }}>{s}</span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Sector heatmap ────────────────────────────────────────────────────────────
 function HeatCell({ sector, period, vsNifty }) {
   const raw = vsNifty
@@ -213,7 +535,6 @@ function HeatCell({ sector, period, vsNifty }) {
     );
   }
 
-  // Colour intensity: ±5% maps to full green/red
   const intensity = Math.min(Math.abs(raw) / 5, 1);
   const bg = raw >= 0
     ? `rgba(34,197,94,${0.08 + intensity * 0.25})`
@@ -231,9 +552,7 @@ function HeatCell({ sector, period, vsNifty }) {
         {raw >= 0 ? '+' : ''}{raw.toFixed(1)}%
       </div>
       {vsNifty && (
-        <div style={{ fontSize: 9, color: fg, opacity: 0.8 }}>
-          vs Nifty
-        </div>
+        <div style={{ fontSize: 9, color: fg, opacity: 0.8 }}>vs Nifty</div>
       )}
     </div>
   );
@@ -255,11 +574,8 @@ function SectorHeatmap({ sectors }) {
          style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
       <div className="flex items-center justify-between px-4 py-3"
            style={{ borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>
-          NSE Sector Heatmap
-        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>NSE Sector Heatmap</div>
         <div className="flex items-center gap-2">
-          {/* vs Nifty toggle */}
           <button
             onClick={() => setVsNifty(v => !v)}
             className="text-xs px-3 py-1 rounded-lg transition-colors"
@@ -270,7 +586,6 @@ function SectorHeatmap({ sectors }) {
             }}>
             vs Nifty
           </button>
-          {/* Period selector */}
           <div className="flex rounded-lg overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
             {PERIODS.map(p => (
               <button key={p.key} onClick={() => setPeriod(p.key)}
@@ -397,7 +712,6 @@ export default function MacroDashboard({ onLogout }) {
 
   useEffect(() => {
     load();
-    // Auto-refresh every 15 minutes
     const interval = setInterval(() => load(true), 15 * 60 * 1000);
     return () => clearInterval(interval);
   }, [load]);
@@ -435,9 +749,12 @@ export default function MacroDashboard({ onLogout }) {
     );
   }
 
-  const { commodities = [], global_macro = [], india_macro = [], sectors = [], regime = {} } = data || {};
+  const {
+    commodities = [], global_macro = [], india_macro = [], sectors = [], regime = {},
+    global_equities = [], credit_markets = [], ratios = [],
+    us_cycle = null, india_cycle = null, fii_dii = [],
+  } = data || {};
 
-  // Split india macro into key groups
   const indiaPrimary = india_macro.filter(d => ['nifty','banknifty','midcap'].includes(d.key));
   const indiaSub     = india_macro.filter(d => ['india_vix','usdinr'].includes(d.key));
 
@@ -497,10 +814,9 @@ export default function MacroDashboard({ onLogout }) {
       <div style={{ flex: 1, overflow: 'auto', padding: '16px 20px', display: 'flex',
                     flexDirection: 'column', gap: 16 }}>
 
-        {/* Row 1: Regime + India + Global */}
+        {/* ── Row 1: Regime + India + Global Macro ── */}
         <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr 1fr', gap: 16 }}>
 
-          {/* Regime */}
           <RegimePanel regime={regime} />
 
           {/* India Macro */}
@@ -526,7 +842,6 @@ export default function MacroDashboard({ onLogout }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               {global_macro.map(item => <MacroStat key={item.key} item={item} highlight={item.key === 'vix'} />)}
             </div>
-            {/* Yield curve context */}
             {regime.yield_curve != null && (
               <div className="rounded-xl p-3"
                    style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
@@ -551,14 +866,55 @@ export default function MacroDashboard({ onLogout }) {
           </div>
         </div>
 
-        {/* Row 2: Commodities table */}
+        {/* ── Row 2: Cycle Scorecards ── */}
+        {(india_cycle || us_cycle) && (
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: C.muted,
+                          textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+              Business Cycle Positioning
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <CycleScorecardPanel cycle={india_cycle} market="India" />
+              <CycleScorecardPanel cycle={us_cycle} market="US" />
+            </div>
+          </div>
+        )}
+
+        {/* ── Row 3: Macro Ratios + FII/DII ── */}
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: C.muted,
+                        textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+            Key Macro Ratios
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
+            {/* Ratios grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+              {ratios.map(r => <MacroRatioCard key={r.key} ratio={r} />)}
+            </div>
+            {/* FII/DII */}
+            <FIIDIIPanel fiiDii={fii_dii} />
+          </div>
+        </div>
+
+        {/* ── Row 4: Global Equities ── */}
+        {global_equities.length > 0 && (
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: C.muted,
+                          textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+              Global Equity Pulse
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 10 }}>
+              {global_equities.map(item => <GlobalEquityCard key={item.key} item={item} />)}
+            </div>
+          </div>
+        )}
+
+        {/* ── Row 5: Commodities ── */}
         <div className="rounded-xl overflow-hidden"
              style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
           <div style={{ padding: '12px 16px', borderBottom: `1px solid ${C.border}`,
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>
-              Commodities
-            </div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>Commodities</div>
             <div style={{ display: 'flex', gap: 24, fontSize: 10, color: C.muted }}>
               {['Price', '1D', '1W', '1M', '3M', 'YTD', 'Trend', 'Chart'].map(h => (
                 <span key={h}>{h}</span>
@@ -568,12 +924,12 @@ export default function MacroDashboard({ onLogout }) {
           {commodities.map(c => <CommodityRow key={c.key} item={c} />)}
         </div>
 
-        {/* Row 3: Sector heatmap */}
+        {/* ── Row 6: Sector heatmap ── */}
         <SectorHeatmap sectors={sectors} />
 
         {/* Footer */}
         <div style={{ fontSize: 10, color: C.muted, textAlign: 'center', paddingBottom: 8 }}>
-          Data via Yahoo Finance · Prices delayed 15–20 min ·
+          Data via Yahoo Finance · NSE · Prices delayed 15–20 min ·
           Generated {data?.generated_at ? new Date(data.generated_at).toLocaleString('en-IN') : '—'}
         </div>
       </div>
