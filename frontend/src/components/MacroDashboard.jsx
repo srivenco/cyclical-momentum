@@ -42,6 +42,104 @@ const PHASE_COLORS = {
   muted:  C.muted,
 };
 
+// ── Cycle phase data ──────────────────────────────────────────────────────────
+const US_PHASE_ORDER   = ['RECOVERY', 'EXPANSION', 'LATE CYCLE', 'SLOWDOWN', 'RECESSION'];
+const INDIA_PHASE_ORDER = ['RATE CUT CYCLE', 'BULL', 'CAUTIOUS', 'CORRECTION', 'BEAR'];
+
+// Hex colours for wheel segments (matches badge colour intent)
+const WHEEL_COLOR = {
+  'RECOVERY':       '#00b4d8',
+  'EXPANSION':      '#22c55e',
+  'LATE CYCLE':     '#f59e0b',
+  'SLOWDOWN':       '#f97316',
+  'RECESSION':      '#ef4444',
+  'RATE CUT CYCLE': '#00b4d8',
+  'BULL':           '#22c55e',
+  'CAUTIOUS':       '#f59e0b',
+  'CORRECTION':     '#f97316',
+  'BEAR':           '#ef4444',
+};
+
+// Short labels for inside wheel segments (max ~6 chars)
+const WHEEL_LABEL = {
+  'RECOVERY':       ['RCOV','ERY'],
+  'EXPANSION':      ['EXPAN',null],
+  'LATE CYCLE':     ['LATE','CYCLE'],
+  'SLOWDOWN':       ['SLOW',null],
+  'RECESSION':      ['RCESS',null],
+  'RATE CUT CYCLE': ['RATE','CUT'],
+  'BULL':           ['BULL',null],
+  'CAUTIOUS':       ['CAUT','IOUS'],
+  'CORRECTION':     ['CORR',null],
+  'BEAR':           ['BEAR',null],
+};
+
+// Historical sector performance per phase (sourced from cyclical investing research)
+const HISTORICAL_SECTORS = {
+  // US phases
+  'RECOVERY': [
+    { name: 'Small Caps',    perf: '+28%', note: 'Lead cycle re-rating' },
+    { name: 'Tech',          perf: '+25%', note: 'Growth re-priced' },
+    { name: 'Financials',    perf: '+22%', note: 'Spread compression' },
+    { name: 'Consumer Disc', perf: '+18%', note: 'Spending bounces' },
+  ],
+  'EXPANSION': [
+    { name: 'Financials',    perf: '+18%', note: 'Lending volume up' },
+    { name: 'Industrials',   perf: '+15%', note: 'CapEx cycle peaks' },
+    { name: 'Consumer Disc', perf: '+14%', note: 'Wages & confidence' },
+    { name: 'Materials',     perf: '+12%', note: 'Commodity demand' },
+  ],
+  'LATE CYCLE': [
+    { name: 'Energy',        perf: '+22%', note: 'Demand peaks late' },
+    { name: 'Materials',     perf: '+15%', note: 'Real assets bid' },
+    { name: 'Healthcare',    perf: '+8%',  note: 'Defensive rotation' },
+    { name: 'Utilities',     perf: '+4%',  note: 'Early safe-haven' },
+  ],
+  'SLOWDOWN': [
+    { name: 'Healthcare',    perf: '+5%',  note: 'Non-cyclical revenue' },
+    { name: 'Utilities',     perf: '+3%',  note: 'Rate-cut beneficiary' },
+    { name: 'Staples',       perf: '+2%',  note: 'Pricing power holds' },
+    { name: 'Quality Tech',  perf: '0-5%', note: 'Earnings resilience' },
+  ],
+  'RECESSION': [
+    { name: 'Gold',          perf: '+12%', note: 'Safe haven & real rates' },
+    { name: 'Long Bonds',    perf: '+8%',  note: 'TLT outperforms' },
+    { name: 'Utilities',     perf: '+1%',  note: 'Dividend floor' },
+    { name: 'Cash',          perf: '—',    note: 'Capital preservation' },
+  ],
+  // India phases
+  'BULL': [
+    { name: 'Realty',        perf: '+45%', note: 'Leverage + sentiment' },
+    { name: 'Banks',         perf: '+35%', note: 'Credit cycle boom' },
+    { name: 'Auto',          perf: '+28%', note: 'Discretionary spend' },
+    { name: 'Consumer Disc', perf: '+25%', note: 'Premiumisation' },
+  ],
+  'CAUTIOUS': [
+    { name: 'IT',            perf: '+15%', note: 'USD earnings hedge' },
+    { name: 'FMCG',          perf: '+12%', note: 'Staples + pricing' },
+    { name: 'Quality LargeCap', perf: '+8%', note: 'Low-beta outperform' },
+    { name: 'Healthcare',    perf: '+6%',  note: 'Defensive + exports' },
+  ],
+  'CORRECTION': [
+    { name: 'Gold ETFs',     perf: '+15%', note: 'INR hedge' },
+    { name: 'IT (exports)',  perf: '+10%', note: 'Weak rupee tailwind' },
+    { name: 'Pharma (exp)',  perf: '+8%',  note: 'USD export revenue' },
+    { name: 'Cash',          perf: '—',    note: 'Reduce beta' },
+  ],
+  'BEAR': [
+    { name: 'Gold',          perf: '+20%', note: 'Crisis safe haven' },
+    { name: 'IT',            perf: '+5%',  note: 'Relative outperform' },
+    { name: 'Pharma',        perf: '+3%',  note: 'Defensive revenue' },
+    { name: 'Cash / FD',     perf: '—',    note: 'Risk-off posture' },
+  ],
+  'RATE CUT CYCLE': [
+    { name: 'Realty',        perf: '+35%', note: 'Rate sensitivity highest' },
+    { name: 'NBFCs',         perf: '+30%', note: 'CoF falls fastest' },
+    { name: 'Banks',         perf: '+25%', note: 'NIM expansion lagged' },
+    { name: 'Auto',          perf: '+20%', note: 'EMI-driven demand' },
+  ],
+};
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const pct = (n, dec = 2) => {
   if (n == null) return <span style={{ color: C.muted }}>—</span>;
@@ -377,45 +475,186 @@ function FIIDIIPanel({ fiiDii }) {
   );
 }
 
+// ── Cycle wheel SVG ───────────────────────────────────────────────────────────
+function CycleWheel({ phases, currentPhase }) {
+  const size = 220;
+  const cx = 110, cy = 110;
+  const R = 92, r = 54;
+  const n = phases.length;
+  const degEach = 360 / n;
+  const gap = 3; // degrees gap between segments
+
+  const toRad = d => d * Math.PI / 180;
+  const xy = (radius, deg) => [
+    cx + radius * Math.cos(toRad(deg)),
+    cy + radius * Math.sin(toRad(deg)),
+  ];
+
+  const arcPath = (startD, endD) => {
+    const [x1, y1] = xy(R, startD);
+    const [x2, y2] = xy(R, endD);
+    const [x3, y3] = xy(r, endD);
+    const [x4, y4] = xy(r, startD);
+    const large = (endD - startD > 180) ? 1 : 0;
+    return `M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large},0 ${x4},${y4} Z`;
+  };
+
+  const currentIdx = phases.indexOf(currentPhase);
+  const nextPhase  = phases[(currentIdx + 1) % n];
+  const nextColor  = WHEEL_COLOR[nextPhase] || C.muted;
+  const nowColor   = WHEEL_COLOR[currentPhase] || C.muted;
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: 'visible' }}>
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      {phases.map((phase, i) => {
+        const startDeg = -90 + i * degEach + gap / 2;
+        const endDeg   = -90 + (i + 1) * degEach - gap / 2;
+        const midDeg   = -90 + i * degEach + degEach / 2;
+        const midR     = (R + r) / 2;
+        const isCurrent = phase === currentPhase;
+        const isNext    = phase === nextPhase;
+        const color = WHEEL_COLOR[phase] || C.muted;
+        const opacity = isCurrent ? 1 : isNext ? 0.45 : 0.18;
+
+        const [lx, ly] = xy(midR, midDeg);
+        const labels = WHEEL_LABEL[phase] || [phase.slice(0, 5), null];
+
+        return (
+          <g key={phase}>
+            {/* Glow ring for current */}
+            {isCurrent && (
+              <path d={arcPath(startDeg, endDeg)}
+                    fill={color} fillOpacity={0.25}
+                    stroke={color} strokeWidth={3} strokeOpacity={0.5}
+                    filter="url(#glow)" />
+            )}
+            {/* Segment */}
+            <path d={arcPath(startDeg, endDeg)}
+                  fill={color} fillOpacity={opacity}
+                  stroke={color} strokeWidth={isCurrent ? 1.5 : 0.5}
+                  strokeOpacity={isCurrent ? 0.9 : 0.4} />
+
+            {/* Next-phase dashed border */}
+            {isNext && (
+              <path d={arcPath(startDeg, endDeg)}
+                    fill="none"
+                    stroke={color} strokeWidth={1.5} strokeOpacity={0.7}
+                    strokeDasharray="3,2" />
+            )}
+
+            {/* Labels inside segment */}
+            <text x={lx} y={ly - (labels[1] ? 4 : 0)}
+                  textAnchor="middle" dominantBaseline="middle"
+                  fill={isCurrent ? 'white' : color}
+                  fillOpacity={isCurrent ? 1 : opacity + 0.2}
+                  fontSize={isCurrent ? 8 : 7}
+                  fontWeight={isCurrent ? 700 : 500}
+                  fontFamily="-apple-system,sans-serif">
+              {labels[0]}
+            </text>
+            {labels[1] && (
+              <text x={lx} y={ly + 8}
+                    textAnchor="middle" dominantBaseline="middle"
+                    fill={isCurrent ? 'white' : color}
+                    fillOpacity={isCurrent ? 1 : opacity + 0.2}
+                    fontSize={isCurrent ? 8 : 7}
+                    fontWeight={isCurrent ? 700 : 500}
+                    fontFamily="-apple-system,sans-serif">
+                {labels[1]}
+              </text>
+            )}
+          </g>
+        );
+      })}
+
+      {/* Center: current phase */}
+      <circle cx={cx} cy={cy} r={r - 4} fill={C.bg} />
+      <text x={cx} y={cy - 10} textAnchor="middle"
+            fill={C.muted} fontSize={8} fontFamily="-apple-system,sans-serif">
+        NOW
+      </text>
+      <text x={cx} y={cy + 3} textAnchor="middle"
+            fill={nowColor} fontSize={9} fontWeight={700}
+            fontFamily="-apple-system,sans-serif">
+        {(currentPhase || '').split(' ').slice(0, 2).join(' ')}
+      </text>
+      {(currentPhase || '').split(' ').length > 2 && (
+        <text x={cx} y={cy + 14} textAnchor="middle"
+              fill={nowColor} fontSize={9} fontWeight={700}
+              fontFamily="-apple-system,sans-serif">
+          {(currentPhase || '').split(' ').slice(2).join(' ')}
+        </text>
+      )}
+
+      {/* Next arrow */}
+      <text x={cx} y={cy + 26} textAnchor="middle"
+            fill={C.dim} fontSize={7} fontFamily="-apple-system,sans-serif">
+        ▸ next:
+      </text>
+      <text x={cx} y={cy + 36} textAnchor="middle"
+            fill={nextColor} fontSize={8} fontWeight={600}
+            fontFamily="-apple-system,sans-serif">
+        {(nextPhase || '').split(' ').slice(0, 2).join(' ')}
+      </text>
+
+      {/* Clockwise arrow around outer ring */}
+      {(() => {
+        const arrowDeg = -90 + (currentIdx + 0.5) * degEach + degEach + 4;
+        const [ax, ay] = xy(R + 8, arrowDeg);
+        return (
+          <text x={ax} y={ay} textAnchor="middle" dominantBaseline="middle"
+                fill={C.muted} fontSize={8} fontFamily="-apple-system,sans-serif">
+            ↻
+          </text>
+        );
+      })()}
+    </svg>
+  );
+}
+
 // ── Cycle scorecard panel ─────────────────────────────────────────────────────
 function CycleScorecardPanel({ cycle, market }) {
   if (!cycle) return null;
 
-  const phaseColor = PHASE_COLORS[cycle.color] || C.muted;
-  const bgGlow = cycle.color === 'green'  ? 'rgba(34,197,94,0.04)'
-               : cycle.color === 'red'    ? 'rgba(239,68,68,0.04)'
-               : cycle.color === 'amber'  ? 'rgba(245,158,11,0.04)'
-               : cycle.color === 'orange' ? 'rgba(249,115,22,0.04)'
-               : cycle.color === 'blue'   ? 'rgba(0,180,216,0.04)'
-               : 'transparent';
-  const borderGlow = cycle.color === 'green'  ? 'rgba(34,197,94,0.25)'
-                   : cycle.color === 'red'    ? 'rgba(239,68,68,0.25)'
-                   : cycle.color === 'amber'  ? 'rgba(245,158,11,0.25)'
-                   : cycle.color === 'orange' ? 'rgba(249,115,22,0.25)'
-                   : cycle.color === 'blue'   ? 'rgba(0,180,216,0.25)'
-                   : C.border;
+  const phaseOrder  = market === 'India' ? INDIA_PHASE_ORDER : US_PHASE_ORDER;
+  const phaseColor  = PHASE_COLORS[cycle.color] || C.muted;
+  const borderGlow  = cycle.color === 'green'  ? 'rgba(34,197,94,0.25)'
+                    : cycle.color === 'red'    ? 'rgba(239,68,68,0.25)'
+                    : cycle.color === 'amber'  ? 'rgba(245,158,11,0.25)'
+                    : cycle.color === 'orange' ? 'rgba(249,115,22,0.25)'
+                    : cycle.color === 'blue'   ? 'rgba(0,180,216,0.25)'
+                    : C.border;
 
-  // Score bar: 0-100
-  const score = cycle.score_pct ?? 50;
-  const barColor = score >= 65 ? C.green
-                 : score >= 50 ? C.amber
-                 : score >= 35 ? C.orange
-                 : C.red;
+  const score    = cycle.score_pct ?? 50;
+  const barColor = score >= 65 ? C.green : score >= 50 ? C.amber : score >= 35 ? C.orange : C.red;
+
+  const currentIdx  = phaseOrder.indexOf(cycle.phase);
+  const nextPhase   = phaseOrder[(currentIdx + 1) % phaseOrder.length];
+  const nextColor   = WHEEL_COLOR[nextPhase] || C.muted;
+  const historicalSectors = HISTORICAL_SECTORS[cycle.phase] || [];
 
   return (
     <div className="rounded-xl overflow-hidden flex flex-col"
-         style={{ backgroundColor: bgGlow, border: `1px solid ${borderGlow}` }}>
+         style={{ border: `1px solid ${borderGlow}`, backgroundColor: C.card }}>
 
-      {/* Header */}
+      {/* ── Header strip ── */}
       <div className="px-4 py-3" style={{ borderBottom: `1px solid ${C.border}` }}>
         <div className="flex items-center justify-between">
           <div style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>
-            {market} Cycle Scorecard
+            {market} Cycle
           </div>
           <RegimeBadge label={cycle.phase} color={cycle.color} />
         </div>
-        <div style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>{cycle.description}</div>
-
+        <div style={{ fontSize: 11, color: C.muted, marginTop: 3, lineHeight: 1.4 }}>
+          {cycle.description}
+        </div>
         {/* Score bar */}
         <div className="mt-3">
           <div className="flex items-center justify-between mb-1">
@@ -423,60 +662,104 @@ function CycleScorecardPanel({ cycle, market }) {
             <span style={{ fontSize: 10, fontWeight: 700, color: barColor }}>{score}% Bullish</span>
             <span style={{ fontSize: 9, color: C.muted }}>BULL</span>
           </div>
-          <div style={{ height: 6, backgroundColor: C.dim, borderRadius: 3, overflow: 'hidden' }}>
-            <div style={{
-              height: '100%', borderRadius: 3,
-              width: `${score}%`,
-              backgroundColor: barColor,
-              transition: 'width 0.5s ease',
-            }} />
+          <div style={{ height: 5, backgroundColor: C.dim, borderRadius: 3, overflow: 'hidden' }}>
+            <div style={{ height: '100%', borderRadius: 3, width: `${score}%`,
+                          backgroundColor: barColor, transition: 'width 0.5s ease' }} />
           </div>
         </div>
       </div>
 
-      {/* Signal matrix */}
-      <div style={{ padding: '12px 16px', borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: C.muted,
-                      textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
-          Signal Matrix
-        </div>
-        <div className="flex flex-col gap-1">
-          {(cycle.signals || []).map((sig, i) => (
-            <div key={i} className="flex items-center gap-2 py-1"
-                 style={{ borderBottom: `1px solid ${C.border2}` }}>
-              <div style={{
-                width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-                backgroundColor: sig.bullish === true  ? C.green
-                               : sig.bullish === false ? C.red
-                               : C.muted,
-              }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: 'white' }}>{sig.label}</div>
-                <div style={{ fontSize: 10, color: C.muted, lineHeight: 1.3, marginTop: 1 }}>{sig.reading}</div>
-              </div>
-              {sig.weight > 1 && (
-                <div style={{ fontSize: 9, color: C.dim, flexShrink: 0 }}>×{sig.weight}</div>
-              )}
+      {/* ── Main body: wheel + signals ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', borderBottom: `1px solid ${C.border}` }}>
+
+        {/* Wheel */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center',
+                      padding: '12px 8px 8px', borderRight: `1px solid ${C.border}` }}>
+          <CycleWheel phases={phaseOrder} currentPhase={cycle.phase} />
+          {/* Next phase callout */}
+          <div style={{ marginTop: 8, textAlign: 'center' }}>
+            <div style={{ fontSize: 9, color: C.muted, marginBottom: 3 }}>TYPICALLY TRANSITIONS TO</div>
+            <div style={{
+              fontSize: 11, fontWeight: 700, color: nextColor,
+              padding: '3px 10px', borderRadius: 6,
+              backgroundColor: `${nextColor}18`,
+              border: `1px dashed ${nextColor}60`,
+              display: 'inline-block',
+            }}>
+              {nextPhase} →
             </div>
-          ))}
+          </div>
+        </div>
+
+        {/* Signal matrix */}
+        <div style={{ padding: '12px 14px', overflow: 'hidden' }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: C.muted,
+                        textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+            Signal Matrix
+          </div>
+          <div className="flex flex-col gap-0">
+            {(cycle.signals || []).map((sig, i) => (
+              <div key={i} style={{
+                display: 'flex', alignItems: 'flex-start', gap: 8, padding: '5px 0',
+                borderBottom: `1px solid ${C.border2}`,
+              }}>
+                <div style={{
+                  width: 7, height: 7, borderRadius: '50%', flexShrink: 0, marginTop: 2,
+                  backgroundColor: sig.bullish === true  ? C.green
+                                 : sig.bullish === false ? C.red
+                                 : C.muted,
+                  boxShadow: sig.bullish === true  ? `0 0 5px ${C.green}80`
+                            : sig.bullish === false ? `0 0 5px ${C.red}80`
+                            : 'none',
+                }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: 'white', lineHeight: 1.3 }}>{sig.label}</div>
+                  <div style={{ fontSize: 9, color: C.muted, lineHeight: 1.3, marginTop: 1 }}>{sig.reading}</div>
+                </div>
+                {sig.weight > 1 && (
+                  <div style={{ fontSize: 9, color: C.dim, flexShrink: 0, paddingTop: 2 }}>×{sig.weight}</div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Sector playbook */}
+      {/* ── Historical best sectors ── */}
+      {historicalSectors.length > 0 && (
+        <div style={{ padding: '12px 16px', borderBottom: `1px solid ${C.border}` }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: C.muted,
+                        textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+            Historically Best Sectors · {cycle.phase}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            {historicalSectors.map((s, i) => (
+              <div key={i} style={{
+                padding: '8px 10px', borderRadius: 8,
+                backgroundColor: C.surface, border: `1px solid ${C.border}`,
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: phaseColor }}>{s.perf}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: 'white', marginTop: 2 }}>{s.name}</div>
+                <div style={{ fontSize: 9, color: C.muted, marginTop: 2, lineHeight: 1.3 }}>{s.note}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Sector playbook ── */}
       <div style={{ padding: '12px 16px' }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: C.muted,
                       textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
-          Sector Playbook
+          Current Playbook
         </div>
-        <div className="flex flex-col gap-3">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
           <div>
-            <div style={{ fontSize: 10, color: C.green, fontWeight: 600, marginBottom: 4 }}>
-              ▲ Overweight
-            </div>
-            <div className="flex flex-wrap gap-1">
+            <div style={{ fontSize: 10, color: C.green, fontWeight: 600, marginBottom: 4 }}>▲ Overweight</div>
+            <div className="flex flex-col gap-1">
               {(cycle.overweight || []).map((s, i) => (
                 <span key={i} style={{
-                  fontSize: 10, padding: '2px 6px', borderRadius: 4,
+                  fontSize: 10, padding: '2px 7px', borderRadius: 4, display: 'inline-block',
                   backgroundColor: 'rgba(34,197,94,0.1)',
                   color: C.green, border: '1px solid rgba(34,197,94,0.2)',
                 }}>{s}</span>
@@ -484,35 +767,29 @@ function CycleScorecardPanel({ cycle, market }) {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: 10, color: C.red, fontWeight: 600, marginBottom: 4 }}>
-              ▼ Underweight
-            </div>
-            <div className="flex flex-wrap gap-1">
+            <div style={{ fontSize: 10, color: C.red, fontWeight: 600, marginBottom: 4 }}>▼ Underweight</div>
+            <div className="flex flex-col gap-1">
               {(cycle.underweight || []).map((s, i) => (
                 <span key={i} style={{
-                  fontSize: 10, padding: '2px 6px', borderRadius: 4,
+                  fontSize: 10, padding: '2px 7px', borderRadius: 4, display: 'inline-block',
                   backgroundColor: 'rgba(239,68,68,0.1)',
                   color: C.red, border: '1px solid rgba(239,68,68,0.2)',
                 }}>{s}</span>
               ))}
             </div>
           </div>
-          {cycle.watch?.length > 0 && (
-            <div>
-              <div style={{ fontSize: 10, color: C.amber, fontWeight: 600, marginBottom: 4 }}>
-                ◉ Watch
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {cycle.watch.map((s, i) => (
-                  <span key={i} style={{
-                    fontSize: 10, padding: '2px 6px', borderRadius: 4,
-                    backgroundColor: 'rgba(245,158,11,0.1)',
-                    color: C.amber, border: '1px solid rgba(245,158,11,0.2)',
-                  }}>{s}</span>
-                ))}
-              </div>
+          <div>
+            <div style={{ fontSize: 10, color: C.amber, fontWeight: 600, marginBottom: 4 }}>◉ Watch</div>
+            <div className="flex flex-col gap-1">
+              {(cycle.watch || []).map((s, i) => (
+                <span key={i} style={{
+                  fontSize: 10, padding: '2px 7px', borderRadius: 4, display: 'inline-block',
+                  backgroundColor: 'rgba(245,158,11,0.1)',
+                  color: C.amber, border: '1px solid rgba(245,158,11,0.2)',
+                }}>{s}</span>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
