@@ -254,132 +254,76 @@ def _passes_quality(ticker: str, quality_data: dict) -> bool:
     return True
 
 
-# ── Momentum Engine ───────────────────────────────────────────────────────────
+# ── Batch Price Download ──────────────────────────────────────────────────────
 
-def _compute_momentum(tickers: list) -> pd.DataFrame:
+def _batch_download(tickers: list, period: str = "400d") -> dict:
     """
-    Download price history and compute 12-month and 3-month momentum for each ticker.
-    Returns DataFrame with columns: ticker, ret_12m, ret_3m, price, sector.
+    Download OHLCV for all tickers in ONE yfinance call (much faster than looping).
+    Returns dict: {ticker -> DataFrame with Close/High/Low/Volume columns}.
     """
-    records = []
-    start = (date.today() - timedelta(days=400)).isoformat()
+    if not tickers:
+        return {}
 
+    logger.info(f"Batch downloading {len(tickers)} tickers…")
+    try:
+        raw = yf.download(
+            tickers,
+            period=period,
+            auto_adjust=True,
+            progress=False,
+            group_by="ticker",
+            threads=True,
+        )
+    except Exception as exc:
+        logger.error(f"Batch download failed: {exc}")
+        return {}
+
+    result = {}
+
+    if len(tickers) == 1:
+        # Single ticker — yfinance returns a flat DataFrame
+        t = tickers[0]
+        if isinstance(raw.columns, pd.MultiIndex):
+            raw.columns = raw.columns.get_level_values(0)
+        if not raw.empty:
+            result[t] = raw
+        return result
+
+    # Multi-ticker — columns are MultiIndex (field, ticker) or (ticker, field)
     for ticker in tickers:
         try:
-            df = yf.download(ticker, start=start, progress=False, auto_adjust=True)
-            if df.empty or len(df) < MOMENTUM_LOOKBACK // 2:
+            # yfinance group_by='ticker' gives (ticker, field) MultiIndex
+            if ticker in raw.columns.get_level_values(0):
+                df = raw[ticker].copy()
+            elif ticker in raw.columns.get_level_values(1):
+                df = raw.xs(ticker, axis=1, level=1).copy()
+            else:
                 continue
-            if isinstance(df.columns, pd.MultiIndex):
-                df.columns = df.columns.get_level_values(0)
-            close = df["Close"].squeeze()
 
-            # 12-month: compare today to ~252 days ago, skip last 21 days
-            idx_now   = -1
-            idx_12m   = min(len(close) - 1, MOMENTUM_LOOKBACK)
-            idx_3m    = min(len(close) - 1, MOMENTUM_3M)
-
-            price_now = float(close.iloc[idx_now])
-            price_12m = float(close.iloc[-idx_12m]) if idx_12m < len(close) else None
-            price_3m  = float(close.iloc[-idx_3m])  if idx_3m  < len(close) else None
-
-            ret_12m = ((price_now - price_12m) / price_12m) if price_12m else None
-            ret_3m  = ((price_now - price_3m)  / price_3m)  if price_3m  else None
-
-            # Find sector
-            sector = next(
-                (s for s, tks in QUALITY_UNIVERSE.items() if ticker in tks),
-                "OTHER"
-            )
-
-            records.append({
-                "ticker":  ticker,
-                "sector":  sector,
-                "price":   round(price_now, 2),
-                "ret_12m": round(ret_12m * 100, 2) if ret_12m is not None else None,
-                "ret_3m":  round(ret_3m  * 100, 2) if ret_3m  is not None else None,
-            })
-        except Exception as exc:
-            logger.warning(f"{ticker}: momentum compute failed — {exc}")
+            df = df.dropna(how="all")
+            if not df.empty:
+                result[ticker] = df
+        except Exception:
             continue
 
-    return pd.DataFrame(records) if records else pd.DataFrame()
-
-
-def build_watchlist(quality_data: dict, max_stocks: int = 30) -> list:
-    """
-    1. Filter universe by quality (ROE > 15%, D/E < 1)
-    2. Compute 12m + 3m momentum
-    3. Keep top MOMENTUM_TOP_PCT by 12m return
-    4. Exclude top MOMENTUM_3M_EXCL by 3m return (avoid chasers)
-    5. Return ranked list of up to max_stocks
-
-    Each record: ticker, sector, price, ret_12m, ret_3m, roe, de, rank, quality_confirmed
-    """
-    # Quality filter
-    passing = [t for t in ALL_TICKERS if _passes_quality(t, quality_data)]
-    logger.info(f"Quality filter: {len(passing)}/{len(ALL_TICKERS)} stocks passed")
-
-    # Momentum
-    mom_df = _compute_momentum(passing)
-    if mom_df.empty:
-        return []
-
-    # Drop rows with no 12m return
-    mom_df = mom_df.dropna(subset=["ret_12m"])
-
-    # Momentum ranking percentiles
-    if len(mom_df) >= 4:
-        mom_df["pct_12m"] = mom_df["ret_12m"].rank(pct=True)
-        mom_df["pct_3m"]  = mom_df["ret_3m"].rank(pct=True)
-
-        # Keep top 75th percentile by 12m momentum
-        mom_df = mom_df[mom_df["pct_12m"] >= MOMENTUM_TOP_PCT]
-
-        # Exclude top 10% by 3m momentum (already ran too hard recently)
-        if "pct_3m" in mom_df.columns:
-            mom_df = mom_df[mom_df["pct_3m"] < MOMENTUM_3M_EXCL]
-
-    # Sort by 12m return descending
-    mom_df = mom_df.sort_values("ret_12m", ascending=False).head(max_stocks)
-
-    # Add quality data and ranking
-    result = []
-    for rank, (_, row) in enumerate(mom_df.iterrows(), start=1):
-        ticker = row["ticker"]
-        qd = quality_data.get(ticker, {})
-        result.append({
-            "ticker":            ticker,
-            "sector":            row["sector"],
-            "price":             row["price"],
-            "ret_12m":           row["ret_12m"],
-            "ret_3m":            row.get("ret_3m"),
-            "roe":               qd.get("roe"),
-            "de":                qd.get("de"),
-            "rank":              rank,
-            "quality_confirmed": qd.get("roe") is not None,
-        })
-
+    logger.info(f"  Got data for {len(result)}/{len(tickers)} tickers")
     return result
 
 
-# ── Vol-Crossover Entry Timing ─────────────────────────────────────────────────
+# ── Momentum + Signal Computation (all from same batch data) ──────────────────
 
-def _check_vol_crossover(ticker: str) -> Optional[dict]:
-    """
-    Returns timing signal dict if the stock is firing a vol crossover today,
-    else None. Uses same 3-day crossover logic as main signals engine.
-    """
-    try:
-        df = yf.download(ticker, period="200d", progress=False, auto_adjust=True)
-        if df.empty or len(df) < 110:
-            return None
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
-    except Exception:
+def _ticker_signal_from_df(df: pd.DataFrame, ticker: str) -> Optional[dict]:
+    """Check vol-crossover signal for a single ticker using pre-downloaded DataFrame."""
+    if df is None or len(df) < 110:
         return None
 
-    close  = df["Close"].squeeze()
-    volume = df["Volume"].squeeze()
+    close  = df["Close"].squeeze() if "Close" in df.columns else None
+    volume = df["Volume"].squeeze() if "Volume" in df.columns else None
+    high   = df["High"].squeeze()   if "High"  in df.columns else None
+    low    = df["Low"].squeeze()    if "Low"   in df.columns else None
+
+    if close is None or volume is None:
+        return None
 
     vol_10 = volume.rolling(10).mean()
     vol_91 = volume.rolling(91).mean().replace(0, np.nan)
@@ -398,7 +342,7 @@ def _check_vol_crossover(ticker: str) -> Optional[dict]:
 
     # MA50 filter
     ma50 = close.rolling(MA_PERIOD).mean()
-    if float(close.iloc[-1]) <= float(ma50.iloc[-1]):
+    if pd.isna(ma50.iloc[-1]) or float(close.iloc[-1]) <= float(ma50.iloc[-1]):
         return None
 
     # 20d momentum gate
@@ -408,10 +352,10 @@ def _check_vol_crossover(ticker: str) -> Optional[dict]:
     if ret20 <= MOMENTUM_MIN_PCT or ret20 > MOMENTUM_MAX_PCT:
         return None
 
-    # Bullish candle filter
-    if "High" in df.columns and "Low" in df.columns:
-        dh = float(df["High"].squeeze().iloc[-1])
-        dl = float(df["Low"].squeeze().iloc[-1])
+    # Bullish candle
+    if high is not None and low is not None:
+        dh = float(high.iloc[-1])
+        dl = float(low.iloc[-1])
         dr = dh - dl
         if dr > 0 and (float(close.iloc[-1]) - dl) / dr < CLOSE_POSITION_MIN:
             return None
@@ -421,12 +365,18 @@ def _check_vol_crossover(ticker: str) -> Optional[dict]:
         return None
 
     entry = float(close.iloc[-1])
+
     # ATR stop
-    h  = df["High"].squeeze()
-    l  = df["Low"].squeeze()
-    c  = df["Close"].squeeze()
-    tr = pd.concat([h - l, (h - c.shift(1)).abs(), (l - c.shift(1)).abs()], axis=1).max(axis=1)
-    atr14 = float(tr.rolling(14).mean().iloc[-1])
+    if high is not None and low is not None:
+        tr = pd.concat([
+            high - low,
+            (high - close.shift(1)).abs(),
+            (low  - close.shift(1)).abs(),
+        ], axis=1).max(axis=1)
+        atr14 = float(tr.rolling(14).mean().iloc[-1])
+    else:
+        atr14 = float("nan")
+
     if pd.isna(atr14) or atr14 <= 0:
         stop = round(entry * 0.93, 2)
     else:
@@ -436,23 +386,99 @@ def _check_vol_crossover(ticker: str) -> Optional[dict]:
     target = round(entry + 2.0 * risk, 2)
 
     return {
-        "entry_price":   round(entry, 2),
-        "initial_stop":  stop,
-        "target_price":  target,
-        "stop_pct":      round((stop - entry) / entry * 100, 2),
-        "vol_ratio":     round(vol_now, 2),
-        "ret_20d":       round(ret20 * 100, 2),
+        "entry_price":  round(entry, 2),
+        "initial_stop": stop,
+        "target_price": target,
+        "stop_pct":     round((stop - entry) / entry * 100, 2),
+        "vol_ratio":    round(vol_now, 2),
+        "ret_20d":      round(ret20 * 100, 2),
     }
 
 
-def get_buy_signals(watchlist: list) -> list:
+def build_watchlist_and_signals(quality_data: dict, max_stocks: int = 30) -> tuple:
     """
-    Check each watchlist stock for a vol-crossover signal today.
-    Returns list of signals with all watchlist metadata attached.
+    Single-pass computation using ONE batch yfinance download:
+    1. Download all universe tickers at once
+    2. Quality filter (ROE/D/E)
+    3. Compute 12m + 3m momentum from batch data
+    4. Rank and filter
+    5. Check vol-crossover from same data (no second download)
+
+    Returns (watchlist, signals) tuple.
     """
+    # Quality pre-filter
+    passing = [t for t in ALL_TICKERS if _passes_quality(t, quality_data)]
+    logger.info(f"Quality filter: {len(passing)}/{len(ALL_TICKERS)} passed")
+
+    # ONE batch download for everything
+    price_data = _batch_download(passing, period="400d")
+
+    # Sector lookup map
+    sector_map = {t: s for s, tks in QUALITY_UNIVERSE.items() for t in tks}
+
+    # Compute momentum for each ticker
+    records = []
+    for ticker, df in price_data.items():
+        if "Close" not in df.columns:
+            continue
+        close = df["Close"].squeeze()
+        if len(close) < MOMENTUM_3M + 5:
+            continue
+
+        price_now = float(close.iloc[-1])
+        price_12m = float(close.iloc[-min(len(close), MOMENTUM_LOOKBACK)]) if len(close) >= MOMENTUM_LOOKBACK else None
+        price_3m  = float(close.iloc[-min(len(close), MOMENTUM_3M)])
+
+        ret_12m = ((price_now - price_12m) / price_12m) if price_12m else None
+        ret_3m  = (price_now - price_3m) / price_3m
+
+        records.append({
+            "ticker":  ticker,
+            "sector":  sector_map.get(ticker, "OTHER"),
+            "price":   round(price_now, 2),
+            "ret_12m": round(ret_12m * 100, 2) if ret_12m is not None else None,
+            "ret_3m":  round(ret_3m  * 100, 2),
+        })
+
+    if not records:
+        return [], []
+
+    mom_df = pd.DataFrame(records).dropna(subset=["ret_12m"])
+
+    # Momentum ranking + filtering
+    if len(mom_df) >= 4:
+        mom_df["pct_12m"] = mom_df["ret_12m"].rank(pct=True)
+        mom_df["pct_3m"]  = mom_df["ret_3m"].rank(pct=True)
+        mom_df = mom_df[mom_df["pct_12m"] >= MOMENTUM_TOP_PCT]
+        mom_df = mom_df[mom_df["pct_3m"] < MOMENTUM_3M_EXCL]
+
+    mom_df = mom_df.sort_values("ret_12m", ascending=False).head(max_stocks)
+
+    # Build watchlist
+    watchlist = []
+    for rank, (_, row) in enumerate(mom_df.iterrows(), start=1):
+        ticker = row["ticker"]
+        qd = quality_data.get(ticker, {})
+        watchlist.append({
+            "ticker":            ticker,
+            "sector":            row["sector"],
+            "price":             row["price"],
+            "ret_12m":           row["ret_12m"],
+            "ret_3m":            row.get("ret_3m"),
+            "roe":               qd.get("roe"),
+            "de":                qd.get("de"),
+            "rank":              rank,
+            "quality_confirmed": qd.get("roe") is not None,
+        })
+
+    # Check vol-crossover signals from SAME price data (no extra downloads)
     signals = []
-    for item in watchlist:
-        timing = _check_vol_crossover(item["ticker"])
+    for item in watchlist[:20]:   # only check top 20 for signal timing
+        ticker = item["ticker"]
+        df = price_data.get(ticker)
+        if df is None:
+            continue
+        timing = _ticker_signal_from_df(df, ticker)
         if timing:
             sig = dict(item)
             sig.update(timing)
@@ -460,7 +486,9 @@ def get_buy_signals(watchlist: list) -> list:
             sig["book"]            = "QUALITY_MOMENTUM"
             sig["signal_strength"] = "STRONG" if timing["vol_ratio"] >= VOL_THRESHOLD * 1.5 else "MODERATE"
             signals.append(sig)
-    return signals
+
+    logger.info(f"Watchlist: {len(watchlist)} stocks, {len(signals)} signals")
+    return watchlist, signals
 
 
 # ── LTCG Tax Tracker ──────────────────────────────────────────────────────────
@@ -524,14 +552,12 @@ def _watchlist_cache_is_fresh() -> bool:
 
 def compute_and_cache_watchlist() -> dict:
     """
-    Full computation: quality filter → momentum rank → vol-crossover signals.
-    Saves result to watchlist cache. Designed to run in the background / scheduler.
-    Takes ~2-3 min on Render free tier (90 yfinance downloads).
+    Full computation using a single batch yfinance download.
+    Much faster than sequential downloads (~30s vs ~3min).
     """
-    logger.info("Computing quality-momentum watchlist…")
-    qual_data = load_quality_cache()
-    watchlist = build_watchlist(qual_data, max_stocks=30)
-    signals   = get_buy_signals(watchlist[:20])
+    logger.info("Computing quality-momentum watchlist (batch mode)…")
+    qual_data         = load_quality_cache()
+    watchlist, signals = build_watchlist_and_signals(qual_data, max_stocks=30)
 
     qual_cache = _load_cache()
     qual_fresh = _cache_is_fresh(qual_cache)
