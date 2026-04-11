@@ -12,7 +12,7 @@ from typing import Optional
 
 import yfinance as yf
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -95,6 +95,20 @@ def login(body: LoginRequest):
 @app.get("/api/health")
 def health():
     return {"status": "ok", "timestamp": datetime.utcnow().isoformat() + "Z"}
+
+
+@app.post("/api/run-scan")
+def run_scan(request: Request):
+    # Secured with a simple bearer secret (SCAN_SECRET env var)
+    scan_secret = os.getenv("SCAN_SECRET", "")
+    auth_header = request.headers.get("Authorization", "")
+    token = auth_header.replace("Bearer ", "")
+    if not scan_secret or token != scan_secret:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    from scheduler import run_daily_job
+    import threading
+    threading.Thread(target=run_daily_job, daemon=True).start()
+    return {"status": "scan started", "timestamp": datetime.utcnow().isoformat() + "Z"}
 
 
 # ── Macro ─────────────────────────────────────────────────────────────────────
