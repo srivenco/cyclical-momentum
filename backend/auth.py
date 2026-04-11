@@ -2,25 +2,24 @@ import os
 from datetime import datetime, timedelta
 from typing import Optional
 
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── Config ──────────────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────────
 SECRET_KEY = os.getenv("JWT_SECRET", "change-me-in-production-32chars!!")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_HOURS = 24
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 
 
-# ── Models ───────────────────────────────────────────────────────────────────
+# ── Models ────────────────────────────────────────────────────────────────────
 class LoginRequest(BaseModel):
     password: str
 
@@ -29,12 +28,15 @@ class TokenResponse(BaseModel):
     token: str
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────────────
 def verify_password(plain: str) -> bool:
     stored_hash = os.getenv("APP_PASSWORD_HASH", "")
     if not stored_hash:
-        raise HTTPException(status_code=500, detail="Password hash not configured")
-    return pwd_context.verify(plain, stored_hash)
+        raise HTTPException(status_code=500, detail="APP_PASSWORD_HASH not configured")
+    try:
+        return bcrypt.checkpw(plain.encode("utf-8"), stored_hash.encode("utf-8"))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Password check failed: {str(e)}")
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
