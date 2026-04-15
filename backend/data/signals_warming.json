@@ -1,36 +1,14 @@
 [
   {
-    "ticker": "MPHASIS.NS",
+    "ticker": "TATACONSUM.NS",
     "book": "F4_DEFENSIVE",
-    "sector": "IT",
-    "vol_ratio": 1.36,
+    "sector": "FMCG",
+    "vol_ratio": 1.39,
     "threshold": 2.0,
-    "pct_to_trigger": 67.9,
-    "prior_20d_return": 6.0,
-    "price": 2316.1,
-    "date": "2026-04-14"
-  },
-  {
-    "ticker": "LAURUSLABS.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "PHARMA",
-    "vol_ratio": 1.3,
-    "threshold": 2.0,
-    "pct_to_trigger": 65.2,
-    "prior_20d_return": 4.5,
-    "price": 1087.8,
-    "date": "2026-04-14"
-  },
-  {
-    "ticker": "KPITTECH.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "IT",
-    "vol_ratio": 1.28,
-    "threshold": 2.0,
-    "pct_to_trigger": 63.8,
-    "prior_20d_return": 3.97,
-    "price": 709.85,
-    "date": "2026-04-14"
+    "pct_to_trigger": 69.3,
+    "prior_20d_return": 3.8,
+    "price": 1098.0,
+    "date": "2026-04-15"
   },
   {
     "ticker": "LTIM.NS",
@@ -41,17 +19,17 @@
     "pct_to_trigger": 63.0,
     "prior_20d_return": 4.78,
     "price": 4466.6,
-    "date": "2026-04-14"
+    "date": "2026-04-15"
   },
   {
-    "ticker": "PERSISTENT.NS",
+    "ticker": "MPHASIS.NS",
     "book": "F4_DEFENSIVE",
     "sector": "IT",
-    "vol_ratio": 1.23,
+    "vol_ratio": 1.26,
     "threshold": 2.0,
-    "pct_to_trigger": 61.7,
-    "prior_20d_return": 13.26,
-    "price": 5377.4,
-    "date": "2026-04-14"
+    "pct_to_trigger": 63.0,
+    "prior_20d_return": 8.55,
+    "price": 2372.0,
+    "date": "2026-04-15"
   }
 ]
