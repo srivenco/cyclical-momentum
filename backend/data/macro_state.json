@@ -1,11 +1,11 @@
 {
-  "date": "2026-04-15",
-  "nifty_vs_200ma": -3.87,
+  "date": "2026-04-16",
+  "nifty_vs_200ma": -3.41,
   "nifty_regime": "BEAR",
   "nifty_strength": "STRONG_BEAR",
   "crude_trend": "UP",
   "copper_trend": "UP",
-  "us10y_63d_change": 0.085,
+  "us10y_63d_change": 0.142,
   "rate_regime": "NEUTRAL",
   "rate_strength": "NEUTRAL",
   "commodity_bull": false,
@@ -17,10 +17,10 @@
     "F3B_RATEHIKE",
     "F_RATECUT"
   ],
-  "nifty_price": 24192.25,
-  "nifty_ma200": 25166.39,
-  "crude_price": 91.04,
+  "nifty_price": 24304.05,
+  "nifty_ma200": 25163.24,
+  "crude_price": 91.76,
   "copper_price": 6.11,
-  "us10y": 4.256,
-  "updated_at": "2026-04-15T03:58:58.051840Z"
+  "us10y": 4.282,
+  "updated_at": "2026-04-16T04:14:04.494939Z"
 }
