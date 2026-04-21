@@ -1,35 +1,24 @@
 [
   {
-    "ticker": "LTIM.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "IT",
-    "vol_ratio": 1.3,
-    "threshold": 2.0,
-    "pct_to_trigger": 65.2,
-    "prior_20d_return": 12.99,
-    "price": 4753.6,
-    "date": "2026-04-20"
-  },
-  {
-    "ticker": "TATACONSUM.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "FMCG",
-    "vol_ratio": 1.23,
-    "threshold": 2.0,
-    "pct_to_trigger": 61.5,
-    "prior_20d_return": 3.31,
-    "price": 1113.7,
-    "date": "2026-04-20"
-  },
-  {
     "ticker": "RADICO.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.23,
+    "vol_ratio": 1.47,
     "threshold": 2.0,
-    "pct_to_trigger": 61.4,
-    "prior_20d_return": 19.05,
-    "price": 3260.9,
-    "date": "2026-04-20"
+    "pct_to_trigger": 73.4,
+    "prior_20d_return": 22.37,
+    "price": 3315.9,
+    "date": "2026-04-21"
+  },
+  {
+    "ticker": "JYOTHYLAB.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "FMCG",
+    "vol_ratio": 1.2,
+    "threshold": 2.0,
+    "pct_to_trigger": 60.0,
+    "prior_20d_return": 13.86,
+    "price": 243.89,
+    "date": "2026-04-21"
   }
 ]
