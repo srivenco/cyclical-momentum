@@ -3,22 +3,22 @@
     "ticker": "RADICO.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.47,
+    "vol_ratio": 1.51,
     "threshold": 2.0,
-    "pct_to_trigger": 73.4,
-    "prior_20d_return": 22.37,
-    "price": 3315.9,
-    "date": "2026-04-21"
+    "pct_to_trigger": 75.6,
+    "prior_20d_return": 25.14,
+    "price": 3246.2,
+    "date": "2026-04-22"
   },
   {
     "ticker": "JYOTHYLAB.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.2,
+    "vol_ratio": 1.25,
     "threshold": 2.0,
-    "pct_to_trigger": 60.0,
-    "prior_20d_return": 13.86,
-    "price": 243.89,
-    "date": "2026-04-21"
+    "pct_to_trigger": 62.3,
+    "prior_20d_return": 18.74,
+    "price": 247.1,
+    "date": "2026-04-22"
   }
 ]
