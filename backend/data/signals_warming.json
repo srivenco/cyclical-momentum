@@ -3,22 +3,44 @@
     "ticker": "RADICO.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.51,
+    "vol_ratio": 1.49,
     "threshold": 2.0,
-    "pct_to_trigger": 75.6,
-    "prior_20d_return": 25.14,
-    "price": 3246.2,
-    "date": "2026-04-22"
+    "pct_to_trigger": 74.4,
+    "prior_20d_return": 21.81,
+    "price": 3240.8,
+    "date": "2026-04-23"
+  },
+  {
+    "ticker": "TATACONSUM.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "FMCG",
+    "vol_ratio": 1.26,
+    "threshold": 2.0,
+    "pct_to_trigger": 63.2,
+    "prior_20d_return": 11.82,
+    "price": 1174.3,
+    "date": "2026-04-23"
   },
   {
     "ticker": "JYOTHYLAB.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.25,
+    "vol_ratio": 1.24,
     "threshold": 2.0,
-    "pct_to_trigger": 62.3,
-    "prior_20d_return": 18.74,
-    "price": 247.1,
-    "date": "2026-04-22"
+    "pct_to_trigger": 62.2,
+    "prior_20d_return": 23.1,
+    "price": 256.73,
+    "date": "2026-04-23"
+  },
+  {
+    "ticker": "BIKAJI.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "FMCG",
+    "vol_ratio": 1.21,
+    "threshold": 2.0,
+    "pct_to_trigger": 60.6,
+    "prior_20d_return": 9.35,
+    "price": 688.6,
+    "date": "2026-04-23"
   }
 ]
