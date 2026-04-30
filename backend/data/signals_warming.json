@@ -1,46 +1,46 @@
 [
   {
-    "ticker": "JYOTHYLAB.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "FMCG",
-    "vol_ratio": 1.5,
-    "threshold": 2.0,
-    "pct_to_trigger": 75.2,
-    "prior_20d_return": 27.72,
-    "price": 260.35,
-    "date": "2026-04-29"
-  },
-  {
     "ticker": "GRANULES.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.47,
+    "vol_ratio": 1.85,
     "threshold": 2.0,
-    "pct_to_trigger": 73.4,
-    "prior_20d_return": 14.09,
-    "price": 712.35,
-    "date": "2026-04-29"
+    "pct_to_trigger": 92.7,
+    "prior_20d_return": 15.3,
+    "price": 715.35,
+    "date": "2026-04-30"
   },
   {
-    "ticker": "RADICO.NS",
+    "ticker": "JYOTHYLAB.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.46,
+    "vol_ratio": 1.49,
     "threshold": 2.0,
-    "pct_to_trigger": 73.2,
-    "prior_20d_return": 28.15,
-    "price": 3383.5,
-    "date": "2026-04-29"
+    "pct_to_trigger": 74.6,
+    "prior_20d_return": 32.44,
+    "price": 261.23,
+    "date": "2026-04-30"
   },
   {
     "ticker": "BIKAJI.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.35,
+    "vol_ratio": 1.42,
     "threshold": 2.0,
-    "pct_to_trigger": 67.5,
-    "prior_20d_return": 10.66,
-    "price": 682.8,
-    "date": "2026-04-29"
+    "pct_to_trigger": 71.1,
+    "prior_20d_return": 9.04,
+    "price": 678.15,
+    "date": "2026-04-30"
+  },
+  {
+    "ticker": "RADICO.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "FMCG",
+    "vol_ratio": 1.31,
+    "threshold": 2.0,
+    "pct_to_trigger": 65.4,
+    "prior_20d_return": 26.89,
+    "price": 3336.3,
+    "date": "2026-04-30"
   }
 ]
