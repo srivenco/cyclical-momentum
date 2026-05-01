@@ -3,44 +3,66 @@
     "ticker": "GRANULES.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.85,
+    "vol_ratio": 1.93,
     "threshold": 2.0,
-    "pct_to_trigger": 92.7,
-    "prior_20d_return": 15.3,
-    "price": 715.35,
-    "date": "2026-04-30"
+    "pct_to_trigger": 96.5,
+    "prior_20d_return": 12.78,
+    "price": 699.7,
+    "date": "2026-05-01"
   },
   {
     "ticker": "JYOTHYLAB.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.49,
+    "vol_ratio": 1.58,
     "threshold": 2.0,
-    "pct_to_trigger": 74.6,
-    "prior_20d_return": 32.44,
-    "price": 261.23,
-    "date": "2026-04-30"
+    "pct_to_trigger": 79.0,
+    "prior_20d_return": 34.67,
+    "price": 265.64,
+    "date": "2026-05-01"
   },
   {
     "ticker": "BIKAJI.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.42,
+    "vol_ratio": 1.45,
     "threshold": 2.0,
-    "pct_to_trigger": 71.1,
-    "prior_20d_return": 9.04,
-    "price": 678.15,
-    "date": "2026-04-30"
+    "pct_to_trigger": 72.4,
+    "prior_20d_return": 8.79,
+    "price": 676.65,
+    "date": "2026-05-01"
   },
   {
     "ticker": "RADICO.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.31,
+    "vol_ratio": 1.38,
     "threshold": 2.0,
-    "pct_to_trigger": 65.4,
-    "prior_20d_return": 26.89,
-    "price": 3336.3,
-    "date": "2026-04-30"
+    "pct_to_trigger": 68.9,
+    "prior_20d_return": 30.19,
+    "price": 3423.1,
+    "date": "2026-05-01"
+  },
+  {
+    "ticker": "GLENMARK.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.25,
+    "threshold": 2.0,
+    "pct_to_trigger": 62.6,
+    "prior_20d_return": 12.88,
+    "price": 2406.3,
+    "date": "2026-05-01"
+  },
+  {
+    "ticker": "TATACONSUM.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "FMCG",
+    "vol_ratio": 1.21,
+    "threshold": 2.0,
+    "pct_to_trigger": 60.4,
+    "prior_20d_return": 12.79,
+    "price": 1144.6,
+    "date": "2026-05-01"
   }
 ]
