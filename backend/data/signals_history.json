@@ -318,5 +318,21 @@
     "exit_price": 250.62,
     "exit_reason": "target",
     "pnl_pct": 7.08
+  },
+  {
+    "ticker": "LALPATHLAB.NS",
+    "date": "2026-05-06",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "entry_price": 1570.3,
+    "initial_stop": 1488.75,
+    "target_price": 1733.4,
+    "stop_pct": -5.19,
+    "vol_ratio": 2.74,
+    "prior_20d_return": 16.12,
+    "regime": "NIFTY_BEAR",
+    "signal_strength": "MODERATE",
+    "circuit_breaker": true,
+    "cap_type": "mid_small"
   }
 ]

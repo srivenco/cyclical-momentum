@@ -1,10 +1,27 @@
 {
-  "date": "2026-05-05",
+  "date": "2026-05-06",
   "active_books": [
     "F4_DEFENSIVE"
   ],
   "total_checked": 30,
-  "signal_count": 0,
-  "signals": [],
-  "generated_at": "2026-05-05T04:15:49.709571Z"
+  "signal_count": 1,
+  "signals": [
+    {
+      "ticker": "LALPATHLAB.NS",
+      "date": "2026-05-06",
+      "book": "F4_DEFENSIVE",
+      "sector": "PHARMA",
+      "entry_price": 1570.3,
+      "initial_stop": 1488.75,
+      "target_price": 1733.4,
+      "stop_pct": -5.19,
+      "vol_ratio": 2.74,
+      "prior_20d_return": 16.12,
+      "regime": "NIFTY_BEAR",
+      "signal_strength": "MODERATE",
+      "circuit_breaker": true,
+      "cap_type": "mid_small"
+    }
+  ],
+  "generated_at": "2026-05-06T04:33:04.868256Z"
 }
