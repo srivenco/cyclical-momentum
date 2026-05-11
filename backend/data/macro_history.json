@@ -3172,5 +3172,22 @@
     "us10y_63d_change": 0.186,
     "crude_price": 95.75,
     "copper_price": 6.18
+  },
+  {
+    "date": "2026-05-11",
+    "active_books": [
+      "F4_DEFENSIVE"
+    ],
+    "nifty_regime": "BEAR",
+    "nifty_strength": "STRONG_BEAR",
+    "rate_regime": "NEUTRAL",
+    "rate_strength": "NEUTRAL",
+    "commodity_bull": false,
+    "nifty_vs_200ma": -4.75,
+    "nifty_price": 23876.6,
+    "us10y": 4.364,
+    "us10y_63d_change": 0.166,
+    "crude_price": 100.15,
+    "copper_price": 6.33
   }
 ]
