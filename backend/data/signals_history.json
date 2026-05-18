@@ -334,5 +334,21 @@
     "signal_strength": "MODERATE",
     "circuit_breaker": true,
     "cap_type": "mid_small"
+  },
+  {
+    "ticker": "GLAND.NS",
+    "date": "2026-05-18",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "entry_price": 2126.1,
+    "initial_stop": 2012.18,
+    "target_price": 2353.94,
+    "stop_pct": -5.36,
+    "vol_ratio": 2.61,
+    "prior_20d_return": 18.47,
+    "regime": "NIFTY_BEAR",
+    "signal_strength": "MODERATE",
+    "circuit_breaker": true,
+    "cap_type": "mid_small"
   }
 ]
