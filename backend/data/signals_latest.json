@@ -1,28 +1,11 @@
 {
-  "date": "2026-05-20",
+  "date": "2026-05-21",
   "active_books": [
     "F3B_RATEHIKE",
     "F4_DEFENSIVE"
   ],
   "total_checked": 50,
-  "signal_count": 1,
-  "signals": [
-    {
-      "ticker": "ZYDUSLIFE.NS",
-      "date": "2026-05-20",
-      "book": "F4_DEFENSIVE",
-      "sector": "PHARMA",
-      "entry_price": 1076.8,
-      "initial_stop": 1031.57,
-      "target_price": 1167.26,
-      "stop_pct": -4.2,
-      "vol_ratio": 2.84,
-      "prior_20d_return": 15.8,
-      "regime": "NIFTY_BEAR",
-      "signal_strength": "MODERATE",
-      "circuit_breaker": true,
-      "cap_type": "mid_small"
-    }
-  ],
-  "generated_at": "2026-05-20T05:03:09.681346Z"
+  "signal_count": 0,
+  "signals": [],
+  "generated_at": "2026-05-21T05:08:15.184860Z"
 }
