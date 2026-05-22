@@ -3,55 +3,55 @@
     "ticker": "MANKIND.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.82,
+    "vol_ratio": 1.83,
     "threshold": 2.0,
-    "pct_to_trigger": 91.0,
-    "prior_20d_return": 13.47,
-    "price": 2536.0,
-    "date": "2026-05-21"
+    "pct_to_trigger": 91.5,
+    "prior_20d_return": 8.43,
+    "price": 2486.2,
+    "date": "2026-05-22"
   },
   {
     "ticker": "IPCALAB.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.78,
+    "vol_ratio": 1.79,
     "threshold": 2.0,
-    "pct_to_trigger": 88.9,
-    "prior_20d_return": 6.58,
-    "price": 1626.5,
-    "date": "2026-05-21"
+    "pct_to_trigger": 89.6,
+    "prior_20d_return": 3.84,
+    "price": 1615.7,
+    "date": "2026-05-22"
   },
   {
-    "ticker": "COFORGE.NS",
+    "ticker": "METROPOLIS.NS",
     "book": "F4_DEFENSIVE",
-    "sector": "IT",
-    "vol_ratio": 1.31,
+    "sector": "PHARMA",
+    "vol_ratio": 1.69,
     "threshold": 2.0,
-    "pct_to_trigger": 65.4,
-    "prior_20d_return": 13.69,
-    "price": 1387.7,
-    "date": "2026-05-21"
+    "pct_to_trigger": 84.6,
+    "prior_20d_return": 11.78,
+    "price": 521.1,
+    "date": "2026-05-22"
   },
   {
     "ticker": "CIPLA.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.29,
+    "vol_ratio": 1.32,
     "threshold": 2.0,
-    "pct_to_trigger": 64.7,
-    "prior_20d_return": 7.52,
-    "price": 1404.1,
-    "date": "2026-05-21"
+    "pct_to_trigger": 66.0,
+    "prior_20d_return": 8.08,
+    "price": 1399.6,
+    "date": "2026-05-22"
   },
   {
     "ticker": "AJANTPHARM.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.22,
+    "vol_ratio": 1.25,
     "threshold": 2.0,
-    "pct_to_trigger": 60.9,
-    "prior_20d_return": 14.27,
-    "price": 3177.5,
-    "date": "2026-05-21"
+    "pct_to_trigger": 62.3,
+    "prior_20d_return": 13.42,
+    "price": 3136.4,
+    "date": "2026-05-22"
   }
 ]
