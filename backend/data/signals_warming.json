@@ -1,24 +1,46 @@
 [
   {
-    "ticker": "METROPOLIS.NS",
+    "ticker": "MANKIND.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.4,
+    "vol_ratio": 1.86,
     "threshold": 2.0,
-    "pct_to_trigger": 69.8,
-    "prior_20d_return": 13.87,
-    "price": 544.15,
-    "date": "2026-05-27"
+    "pct_to_trigger": 92.8,
+    "prior_20d_return": 6.89,
+    "price": 2420.4,
+    "date": "2026-05-28"
   },
   {
     "ticker": "GRANULES.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.35,
+    "vol_ratio": 1.6,
     "threshold": 2.0,
-    "pct_to_trigger": 67.7,
-    "prior_20d_return": 11.26,
-    "price": 783.9,
-    "date": "2026-05-27"
+    "pct_to_trigger": 80.1,
+    "prior_20d_return": 11.08,
+    "price": 782.6,
+    "date": "2026-05-28"
+  },
+  {
+    "ticker": "ASTRAZEN.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.59,
+    "threshold": 2.0,
+    "pct_to_trigger": 79.6,
+    "prior_20d_return": 3.33,
+    "price": 8648.0,
+    "date": "2026-05-28"
+  },
+  {
+    "ticker": "METROPOLIS.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.41,
+    "threshold": 2.0,
+    "pct_to_trigger": 70.7,
+    "prior_20d_return": 12.2,
+    "price": 536.15,
+    "date": "2026-05-28"
   }
 ]
