@@ -1,25 +1,14 @@
 [
   {
-    "ticker": "MANKIND.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "PHARMA",
-    "vol_ratio": 1.79,
-    "threshold": 2.0,
-    "pct_to_trigger": 89.7,
-    "prior_20d_return": 8.24,
-    "price": 2442.7,
-    "date": "2026-05-29"
-  },
-  {
     "ticker": "ASTRAZEN.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.68,
+    "vol_ratio": 1.9,
     "threshold": 2.0,
-    "pct_to_trigger": 84.0,
-    "prior_20d_return": 7.23,
-    "price": 8806.5,
-    "date": "2026-05-29"
+    "pct_to_trigger": 95.1,
+    "prior_20d_return": 6.26,
+    "price": 8727.0,
+    "date": "2026-06-01"
   },
   {
     "ticker": "GRANULES.NS",
@@ -28,8 +17,8 @@
     "vol_ratio": 1.62,
     "threshold": 2.0,
     "pct_to_trigger": 81.0,
-    "prior_20d_return": 12.83,
-    "price": 789.45,
-    "date": "2026-05-29"
+    "prior_20d_return": 11.71,
+    "price": 785.75,
+    "date": "2026-06-01"
   }
 ]
