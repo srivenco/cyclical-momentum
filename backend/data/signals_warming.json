@@ -3,22 +3,33 @@
     "ticker": "ASTRAZEN.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.9,
+    "vol_ratio": 1.94,
     "threshold": 2.0,
-    "pct_to_trigger": 95.1,
-    "prior_20d_return": 6.26,
-    "price": 8727.0,
-    "date": "2026-06-01"
+    "pct_to_trigger": 96.8,
+    "prior_20d_return": 8.01,
+    "price": 8690.5,
+    "date": "2026-06-02"
+  },
+  {
+    "ticker": "GLAND.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.89,
+    "threshold": 2.0,
+    "pct_to_trigger": 94.6,
+    "prior_20d_return": 29.86,
+    "price": 2302.8,
+    "date": "2026-06-02"
   },
   {
     "ticker": "GRANULES.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.62,
+    "vol_ratio": 1.5,
     "threshold": 2.0,
-    "pct_to_trigger": 81.0,
-    "prior_20d_return": 11.71,
-    "price": 785.75,
-    "date": "2026-06-01"
+    "pct_to_trigger": 74.9,
+    "prior_20d_return": 9.17,
+    "price": 777.1,
+    "date": "2026-06-02"
   }
 ]
