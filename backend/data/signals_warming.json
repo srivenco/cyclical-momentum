@@ -1,24 +1,24 @@
 [
   {
-    "ticker": "ZYDUSLIFE.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "PHARMA",
-    "vol_ratio": 1.61,
-    "threshold": 2.0,
-    "pct_to_trigger": 80.5,
-    "prior_20d_return": 15.57,
-    "price": 1086.4,
-    "date": "2026-06-05"
-  },
-  {
     "ticker": "GRANULES.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.5,
+    "vol_ratio": 1.54,
     "threshold": 2.0,
-    "pct_to_trigger": 75.1,
-    "prior_20d_return": 4.61,
-    "price": 787.65,
-    "date": "2026-06-05"
+    "pct_to_trigger": 76.8,
+    "prior_20d_return": 3.55,
+    "price": 782.4,
+    "date": "2026-06-08"
+  },
+  {
+    "ticker": "ZYDUSLIFE.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.48,
+    "threshold": 2.0,
+    "pct_to_trigger": 74.0,
+    "prior_20d_return": 14.36,
+    "price": 1094.4,
+    "date": "2026-06-08"
   }
 ]
