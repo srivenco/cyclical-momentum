@@ -1,35 +1,35 @@
 [
   {
-    "ticker": "GRANULES.NS",
+    "ticker": "TORNTPHARM.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.52,
+    "vol_ratio": 1.59,
     "threshold": 2.0,
-    "pct_to_trigger": 76.1,
-    "prior_20d_return": 6.11,
-    "price": 773.6,
-    "date": "2026-06-09"
+    "pct_to_trigger": 79.7,
+    "prior_20d_return": 5.73,
+    "price": 4532.8,
+    "date": "2026-06-10"
   },
   {
     "ticker": "IPCALAB.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.43,
+    "vol_ratio": 1.47,
     "threshold": 2.0,
-    "pct_to_trigger": 71.4,
-    "prior_20d_return": 9.07,
-    "price": 1646.0,
-    "date": "2026-06-09"
+    "pct_to_trigger": 73.4,
+    "prior_20d_return": 9.45,
+    "price": 1648.6,
+    "date": "2026-06-10"
   },
   {
     "ticker": "ZYDUSLIFE.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.39,
+    "vol_ratio": 1.28,
     "threshold": 2.0,
-    "pct_to_trigger": 69.4,
-    "prior_20d_return": 19.16,
-    "price": 1109.0,
-    "date": "2026-06-09"
+    "pct_to_trigger": 64.0,
+    "prior_20d_return": 18.94,
+    "price": 1117.1,
+    "date": "2026-06-10"
   }
 ]
