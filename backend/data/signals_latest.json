@@ -1,11 +1,10 @@
 {
-  "date": "2026-06-11",
+  "date": "2026-06-12",
   "active_books": [
-    "F3B_RATEHIKE",
     "F4_DEFENSIVE"
   ],
-  "total_checked": 50,
+  "total_checked": 30,
   "signal_count": 0,
   "signals": [],
-  "generated_at": "2026-06-11T05:26:42.418098Z"
+  "generated_at": "2026-06-12T05:47:34.243270Z"
 }
