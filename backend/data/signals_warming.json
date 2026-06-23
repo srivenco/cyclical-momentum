@@ -3,11 +3,11 @@
     "ticker": "BIKAJI.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.39,
+    "vol_ratio": 1.4,
     "threshold": 2.0,
-    "pct_to_trigger": 69.6,
-    "prior_20d_return": 3.73,
-    "price": 664.4,
-    "date": "2026-06-22"
+    "pct_to_trigger": 70.1,
+    "prior_20d_return": 3.83,
+    "price": 663.4,
+    "date": "2026-06-23"
   }
 ]
