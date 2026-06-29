@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "ticker": "GLAND.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.98,
+    "threshold": 2.0,
+    "pct_to_trigger": 98.8,
+    "prior_20d_return": 5.29,
+    "price": 2369.1,
+    "date": "2026-06-29"
+  }
+]
