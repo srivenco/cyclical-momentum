@@ -3,11 +3,44 @@
     "ticker": "GLAND.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.98,
+    "vol_ratio": 1.94,
     "threshold": 2.0,
-    "pct_to_trigger": 98.8,
-    "prior_20d_return": 5.29,
-    "price": 2369.1,
-    "date": "2026-06-29"
+    "pct_to_trigger": 96.8,
+    "prior_20d_return": 8.43,
+    "price": 2469.0,
+    "date": "2026-06-30"
+  },
+  {
+    "ticker": "LAURUSLABS.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.4,
+    "threshold": 2.0,
+    "pct_to_trigger": 69.9,
+    "prior_20d_return": 7.61,
+    "price": 1487.8,
+    "date": "2026-06-30"
+  },
+  {
+    "ticker": "AJANTPHARM.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.28,
+    "threshold": 2.0,
+    "pct_to_trigger": 64.1,
+    "prior_20d_return": 12.93,
+    "price": 3288.8,
+    "date": "2026-06-30"
+  },
+  {
+    "ticker": "TORNTPHARM.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.23,
+    "threshold": 2.0,
+    "pct_to_trigger": 61.3,
+    "prior_20d_return": 7.59,
+    "price": 4645.6,
+    "date": "2026-06-30"
   }
 ]
