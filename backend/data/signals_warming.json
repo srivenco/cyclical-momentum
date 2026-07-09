@@ -3,23 +3,23 @@
     "ticker": "GLAND.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.58,
+    "vol_ratio": 1.62,
     "threshold": 2.0,
-    "pct_to_trigger": 79.1,
-    "prior_20d_return": 11.25,
-    "price": 2522.9,
-    "date": "2026-07-08"
+    "pct_to_trigger": 81.0,
+    "prior_20d_return": 8.09,
+    "price": 2493.0,
+    "date": "2026-07-09"
   },
   {
     "ticker": "LAURUSLABS.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.42,
+    "vol_ratio": 1.45,
     "threshold": 2.0,
-    "pct_to_trigger": 71.2,
-    "prior_20d_return": 5.95,
-    "price": 1468.2,
-    "date": "2026-07-08"
+    "pct_to_trigger": 72.5,
+    "prior_20d_return": 9.61,
+    "price": 1518.9,
+    "date": "2026-07-09"
   },
   {
     "ticker": "ALKEM.NS",
@@ -27,42 +27,42 @@
     "sector": "PHARMA",
     "vol_ratio": 1.36,
     "threshold": 2.0,
-    "pct_to_trigger": 68.1,
-    "prior_20d_return": 7.45,
-    "price": 5694.5,
-    "date": "2026-07-08"
+    "pct_to_trigger": 68.0,
+    "prior_20d_return": 7.07,
+    "price": 5674.0,
+    "date": "2026-07-09"
   },
   {
-    "ticker": "EMAMILTD.NS",
-    "book": "F4_DEFENSIVE",
+    "ticker": "MARICO.NS",
+    "book": "F3B_RATEHIKE",
     "sector": "FMCG",
-    "vol_ratio": 1.35,
-    "threshold": 2.0,
-    "pct_to_trigger": 67.3,
-    "prior_20d_return": 5.54,
-    "price": 412.55,
-    "date": "2026-07-08"
-  },
-  {
-    "ticker": "AJANTPHARM.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "PHARMA",
     "vol_ratio": 1.31,
     "threshold": 2.0,
-    "pct_to_trigger": 65.6,
-    "prior_20d_return": 11.2,
-    "price": 3355.1,
-    "date": "2026-07-08"
+    "pct_to_trigger": 65.3,
+    "prior_20d_return": 4.1,
+    "price": 853.5,
+    "date": "2026-07-09"
   },
   {
     "ticker": "MARICO.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
+    "vol_ratio": 1.31,
+    "threshold": 2.0,
+    "pct_to_trigger": 65.3,
+    "prior_20d_return": 4.11,
+    "price": 853.6,
+    "date": "2026-07-09"
+  },
+  {
+    "ticker": "AJANTPHARM.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
     "vol_ratio": 1.29,
     "threshold": 2.0,
     "pct_to_trigger": 64.6,
-    "prior_20d_return": 3.02,
-    "price": 844.7,
-    "date": "2026-07-08"
+    "prior_20d_return": 9.79,
+    "price": 3376.0,
+    "date": "2026-07-09"
   }
 ]
