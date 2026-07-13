@@ -3,88 +3,22 @@
     "ticker": "GLAND.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.68,
+    "vol_ratio": 1.58,
     "threshold": 2.0,
-    "pct_to_trigger": 84.1,
-    "prior_20d_return": 10.51,
-    "price": 2500.0,
-    "date": "2026-07-10"
-  },
-  {
-    "ticker": "LAURUSLABS.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "PHARMA",
-    "vol_ratio": 1.47,
-    "threshold": 2.0,
-    "pct_to_trigger": 73.4,
-    "prior_20d_return": 10.37,
-    "price": 1535.0,
-    "date": "2026-07-10"
-  },
-  {
-    "ticker": "AJANTPHARM.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "PHARMA",
-    "vol_ratio": 1.36,
-    "threshold": 2.0,
-    "pct_to_trigger": 68.0,
-    "prior_20d_return": 6.32,
-    "price": 3342.0,
-    "date": "2026-07-10"
+    "pct_to_trigger": 79.0,
+    "prior_20d_return": 11.05,
+    "price": 2457.7,
+    "date": "2026-07-13"
   },
   {
     "ticker": "ALKEM.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.35,
+    "vol_ratio": 1.31,
     "threshold": 2.0,
-    "pct_to_trigger": 67.4,
-    "prior_20d_return": 7.9,
-    "price": 5720.5,
-    "date": "2026-07-10"
-  },
-  {
-    "ticker": "MARICO.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "FMCG",
-    "vol_ratio": 1.3,
-    "threshold": 2.0,
-    "pct_to_trigger": 65.1,
-    "prior_20d_return": 5.85,
-    "price": 858.2,
-    "date": "2026-07-10"
-  },
-  {
-    "ticker": "MARICO.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "FMCG",
-    "vol_ratio": 1.3,
-    "threshold": 2.0,
-    "pct_to_trigger": 65.1,
-    "prior_20d_return": 5.86,
-    "price": 858.3,
-    "date": "2026-07-10"
-  },
-  {
-    "ticker": "TORNTPHARM.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "PHARMA",
-    "vol_ratio": 1.26,
-    "threshold": 2.0,
-    "pct_to_trigger": 63.1,
-    "prior_20d_return": 6.94,
-    "price": 4889.6,
-    "date": "2026-07-10"
-  },
-  {
-    "ticker": "GRANULES.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "PHARMA",
-    "vol_ratio": 1.23,
-    "threshold": 2.0,
-    "pct_to_trigger": 61.4,
-    "prior_20d_return": 17.16,
-    "price": 897.95,
-    "date": "2026-07-10"
+    "pct_to_trigger": 65.5,
+    "prior_20d_return": 5.17,
+    "price": 5610.0,
+    "date": "2026-07-13"
   }
 ]
