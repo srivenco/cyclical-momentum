@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "ticker": "ALKEM.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.44,
+    "threshold": 2.0,
+    "pct_to_trigger": 71.9,
+    "prior_20d_return": 5.68,
+    "price": 5651.0,
+    "date": "2026-07-16"
+  },
+  {
+    "ticker": "TORNTPHARM.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.33,
+    "threshold": 2.0,
+    "pct_to_trigger": 66.7,
+    "prior_20d_return": 11.92,
+    "price": 4975.3,
+    "date": "2026-07-16"
+  }
+]
