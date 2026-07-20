@@ -1,13 +1,13 @@
 [
   {
-    "ticker": "ALKEM.NS",
+    "ticker": "MASTEK.NS",
     "book": "F4_DEFENSIVE",
-    "sector": "PHARMA",
-    "vol_ratio": 1.46,
+    "sector": "IT",
+    "vol_ratio": 1.24,
     "threshold": 2.0,
-    "pct_to_trigger": 73.1,
-    "prior_20d_return": 4.65,
-    "price": 5622.0,
-    "date": "2026-07-17"
+    "pct_to_trigger": 62.1,
+    "prior_20d_return": 9.25,
+    "price": 1754.5,
+    "date": "2026-07-20"
   }
 ]

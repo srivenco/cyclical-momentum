@@ -1,11 +1,28 @@
 {
-  "date": "2026-07-17",
+  "date": "2026-07-20",
   "active_books": [
     "F3B_RATEHIKE",
     "F4_DEFENSIVE"
   ],
   "total_checked": 50,
-  "signal_count": 0,
-  "signals": [],
-  "generated_at": "2026-07-17T03:58:17.976228Z"
+  "signal_count": 1,
+  "signals": [
+    {
+      "ticker": "TORNTPHARM.NS",
+      "date": "2026-07-20",
+      "book": "F4_DEFENSIVE",
+      "sector": "PHARMA",
+      "entry_price": 4887.3,
+      "initial_stop": 4691.57,
+      "target_price": 5278.76,
+      "stop_pct": -4.0,
+      "vol_ratio": 2.34,
+      "prior_20d_return": 9.65,
+      "regime": "NIFTY_BEAR",
+      "signal_strength": "NORMAL",
+      "circuit_breaker": true,
+      "cap_type": "mid_small"
+    }
+  ],
+  "generated_at": "2026-07-20T04:34:23.355749Z"
 }

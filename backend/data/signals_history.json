@@ -366,5 +366,21 @@
     "signal_strength": "MODERATE",
     "circuit_breaker": true,
     "cap_type": "mid_small"
+  },
+  {
+    "ticker": "TORNTPHARM.NS",
+    "date": "2026-07-20",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "entry_price": 4887.3,
+    "initial_stop": 4691.57,
+    "target_price": 5278.76,
+    "stop_pct": -4.0,
+    "vol_ratio": 2.34,
+    "prior_20d_return": 9.65,
+    "regime": "NIFTY_BEAR",
+    "signal_strength": "NORMAL",
+    "circuit_breaker": true,
+    "cap_type": "mid_small"
   }
 ]
