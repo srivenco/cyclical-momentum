@@ -3,22 +3,11 @@
     "ticker": "HAPPSTMNDS.NS",
     "book": "F4_DEFENSIVE",
     "sector": "IT",
-    "vol_ratio": 1.49,
+    "vol_ratio": 1.46,
     "threshold": 2.0,
-    "pct_to_trigger": 74.3,
-    "prior_20d_return": 8.21,
-    "price": 371.0,
-    "date": "2026-07-22"
-  },
-  {
-    "ticker": "MASTEK.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "IT",
-    "vol_ratio": 1.28,
-    "threshold": 2.0,
-    "pct_to_trigger": 64.1,
-    "prior_20d_return": 6.29,
-    "price": 1682.5,
-    "date": "2026-07-22"
+    "pct_to_trigger": 73.0,
+    "prior_20d_return": 8.53,
+    "price": 368.1,
+    "date": "2026-07-23"
   }
 ]
