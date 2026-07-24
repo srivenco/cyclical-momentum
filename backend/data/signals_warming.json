@@ -5,9 +5,9 @@
     "sector": "IT",
     "vol_ratio": 1.46,
     "threshold": 2.0,
-    "pct_to_trigger": 73.0,
-    "prior_20d_return": 8.53,
-    "price": 368.1,
-    "date": "2026-07-23"
+    "pct_to_trigger": 73.2,
+    "prior_20d_return": 7.53,
+    "price": 364.7,
+    "date": "2026-07-24"
   }
 ]
