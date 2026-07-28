@@ -3,11 +3,22 @@
     "ticker": "MASTEK.NS",
     "book": "F4_DEFENSIVE",
     "sector": "IT",
-    "vol_ratio": 1.36,
+    "vol_ratio": 1.39,
     "threshold": 2.0,
-    "pct_to_trigger": 67.8,
-    "prior_20d_return": 10.78,
-    "price": 1731.5,
-    "date": "2026-07-27"
+    "pct_to_trigger": 69.3,
+    "prior_20d_return": 15.62,
+    "price": 1807.2,
+    "date": "2026-07-28"
+  },
+  {
+    "ticker": "IEX.NS",
+    "book": "F3B_RATEHIKE",
+    "sector": "ENERGY",
+    "vol_ratio": 1.2,
+    "threshold": 2.0,
+    "pct_to_trigger": 60.2,
+    "prior_20d_return": 3.84,
+    "price": 129.94,
+    "date": "2026-07-28"
   }
 ]
