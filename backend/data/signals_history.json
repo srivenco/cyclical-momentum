@@ -382,5 +382,21 @@
     "signal_strength": "NORMAL",
     "circuit_breaker": true,
     "cap_type": "mid_small"
+  },
+  {
+    "ticker": "MASTEK.NS",
+    "date": "2026-07-31",
+    "book": "F4_DEFENSIVE",
+    "sector": "IT",
+    "entry_price": 1922.6,
+    "initial_stop": 1812.67,
+    "target_price": 2142.46,
+    "stop_pct": -5.72,
+    "vol_ratio": 2.07,
+    "prior_20d_return": 19.16,
+    "regime": "NIFTY_BEAR",
+    "signal_strength": "NORMAL",
+    "circuit_breaker": true,
+    "cap_type": "mid_small"
   }
 ]

@@ -1,46 +1,35 @@
 [
   {
-    "ticker": "IEX.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "ENERGY",
-    "vol_ratio": 1.33,
-    "threshold": 2.0,
-    "pct_to_trigger": 66.7,
-    "prior_20d_return": 7.56,
-    "price": 133.23,
-    "date": "2026-07-30"
-  },
-  {
     "ticker": "RADICO.NS",
     "book": "F3B_RATEHIKE",
     "sector": "FMCG",
-    "vol_ratio": 1.26,
+    "vol_ratio": 1.35,
     "threshold": 2.0,
-    "pct_to_trigger": 63.1,
-    "prior_20d_return": 11.54,
-    "price": 4420.9,
-    "date": "2026-07-30"
+    "pct_to_trigger": 67.6,
+    "prior_20d_return": 11.91,
+    "price": 4346.1,
+    "date": "2026-07-31"
   },
   {
     "ticker": "RADICO.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.26,
+    "vol_ratio": 1.35,
     "threshold": 2.0,
-    "pct_to_trigger": 63.1,
-    "prior_20d_return": 11.49,
-    "price": 4419.0,
-    "date": "2026-07-30"
+    "pct_to_trigger": 67.6,
+    "prior_20d_return": 11.91,
+    "price": 4346.1,
+    "date": "2026-07-31"
   },
   {
     "ticker": "MPHASIS.NS",
     "book": "F4_DEFENSIVE",
     "sector": "IT",
-    "vol_ratio": 1.26,
+    "vol_ratio": 1.27,
     "threshold": 2.0,
-    "pct_to_trigger": 62.8,
-    "prior_20d_return": 9.34,
-    "price": 2391.0,
-    "date": "2026-07-30"
+    "pct_to_trigger": 63.7,
+    "prior_20d_return": 6.36,
+    "price": 2325.8,
+    "date": "2026-07-31"
   }
 ]
