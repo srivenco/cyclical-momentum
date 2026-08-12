@@ -1,11 +1,28 @@
 {
-  "date": "2026-08-11",
+  "date": "2026-08-12",
   "active_books": [
     "F3B_RATEHIKE",
     "F4_DEFENSIVE"
   ],
   "total_checked": 50,
-  "signal_count": 0,
-  "signals": [],
-  "generated_at": "2026-08-11T03:02:58.848445Z"
+  "signal_count": 1,
+  "signals": [
+    {
+      "ticker": "GLAND.NS",
+      "date": "2026-08-12",
+      "book": "F4_DEFENSIVE",
+      "sector": "PHARMA",
+      "entry_price": 2924.4,
+      "initial_stop": 2789.22,
+      "target_price": 3194.76,
+      "stop_pct": -4.62,
+      "vol_ratio": 2.15,
+      "prior_20d_return": 18.41,
+      "regime": "NIFTY_BEAR",
+      "signal_strength": "NORMAL",
+      "circuit_breaker": true,
+      "cap_type": "mid_small"
+    }
+  ],
+  "generated_at": "2026-08-12T03:21:41.545250Z"
 }
