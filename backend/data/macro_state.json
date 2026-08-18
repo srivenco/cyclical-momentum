@@ -1,5 +1,5 @@
 {
-  "date": "2026-08-17",
+  "date": "2026-08-18",
   "nifty_vs_200ma": -1.49,
   "nifty_regime": "BEAR",
   "nifty_strength": "BORDERLINE_BEAR",
@@ -19,8 +19,8 @@
   ],
   "nifty_price": 24366.0,
   "nifty_ma200": 24735.75,
-  "crude_price": 82.86,
-  "copper_price": 6.71,
-  "us10y": 4.696,
-  "updated_at": "2026-08-17T02:18:18.097926Z"
+  "crude_price": 85.07,
+  "copper_price": 6.58,
+  "us10y": 4.724,
+  "updated_at": "2026-08-18T02:13:56.566223Z"
 }
