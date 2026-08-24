@@ -414,5 +414,21 @@
     "signal_strength": "NORMAL",
     "circuit_breaker": true,
     "cap_type": "mid_small"
+  },
+  {
+    "ticker": "HAPPSTMNDS.NS",
+    "date": "2026-08-24",
+    "book": "F4_DEFENSIVE",
+    "sector": "IT",
+    "entry_price": 444.55,
+    "initial_stop": 416.53,
+    "target_price": 500.59,
+    "stop_pct": -6.3,
+    "vol_ratio": 2.08,
+    "prior_20d_return": 19.33,
+    "regime": "NIFTY_BEAR",
+    "signal_strength": "NORMAL",
+    "circuit_breaker": true,
+    "cap_type": "mid_small"
   }
 ]
