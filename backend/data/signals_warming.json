@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "ticker": "LAURUSLABS.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.93,
+    "threshold": 2.0,
+    "pct_to_trigger": 96.3,
+    "prior_20d_return": 6.04,
+    "price": 1963.5,
+    "date": "2026-09-11"
+  },
+  {
+    "ticker": "GRANULES.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.25,
+    "threshold": 2.0,
+    "pct_to_trigger": 62.6,
+    "prior_20d_return": 3.53,
+    "price": 887.8,
+    "date": "2026-09-11"
+  }
+]
