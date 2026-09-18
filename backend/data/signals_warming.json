@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "ticker": "GRANULES.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.71,
+    "threshold": 2.0,
+    "pct_to_trigger": 85.7,
+    "prior_20d_return": 3.01,
+    "price": 883.95,
+    "date": "2026-09-18"
+  }
+]
