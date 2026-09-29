@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "ticker": "MANKIND.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.38,
+    "threshold": 2.0,
+    "pct_to_trigger": 69.0,
+    "prior_20d_return": 6.92,
+    "price": 2519.5,
+    "date": "2026-09-29"
+  }
+]
