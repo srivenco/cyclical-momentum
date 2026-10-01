@@ -3,11 +3,11 @@
     "ticker": "MANKIND.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.51,
+    "vol_ratio": 1.49,
     "threshold": 2.0,
-    "pct_to_trigger": 75.6,
-    "prior_20d_return": 3.07,
-    "price": 2464.8,
-    "date": "2026-09-30"
+    "pct_to_trigger": 74.5,
+    "prior_20d_return": 4.67,
+    "price": 2503.3,
+    "date": "2026-10-01"
   }
 ]
