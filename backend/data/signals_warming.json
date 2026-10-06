@@ -1,13 +1,24 @@
 [
   {
+    "ticker": "EMAMILTD.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "FMCG",
+    "vol_ratio": 1.91,
+    "threshold": 2.0,
+    "pct_to_trigger": 95.5,
+    "prior_20d_return": 3.99,
+    "price": 380.65,
+    "date": "2026-10-06"
+  },
+  {
     "ticker": "MANKIND.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.62,
+    "vol_ratio": 1.35,
     "threshold": 2.0,
-    "pct_to_trigger": 81.1,
-    "prior_20d_return": 7.53,
-    "price": 2503.1,
-    "date": "2026-10-05"
+    "pct_to_trigger": 67.6,
+    "prior_20d_return": 8.27,
+    "price": 2500.0,
+    "date": "2026-10-06"
   }
 ]
