@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "ticker": "MPHASIS.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "IT",
+    "vol_ratio": 1.21,
+    "threshold": 2.0,
+    "pct_to_trigger": 60.3,
+    "prior_20d_return": 7.03,
+    "price": 2452.9,
+    "date": "2026-10-13"
+  }
+]
