@@ -430,5 +430,21 @@
     "signal_strength": "NORMAL",
     "circuit_breaker": true,
     "cap_type": "mid_small"
+  },
+  {
+    "ticker": "TATAELXSI.NS",
+    "date": "2026-10-16",
+    "book": "F4_DEFENSIVE",
+    "sector": "IT",
+    "entry_price": 3811.0,
+    "initial_stop": 3623.32,
+    "target_price": 4186.36,
+    "stop_pct": -4.92,
+    "vol_ratio": 2.31,
+    "prior_20d_return": 12.69,
+    "regime": "NIFTY_BEAR",
+    "signal_strength": "NORMAL",
+    "circuit_breaker": true,
+    "cap_type": "mid_small"
   }
 ]
