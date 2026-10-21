@@ -1,24 +1,24 @@
 [
   {
+    "ticker": "MPHASIS.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "IT",
+    "vol_ratio": 1.25,
+    "threshold": 2.0,
+    "pct_to_trigger": 62.7,
+    "prior_20d_return": 11.63,
+    "price": 2563.3,
+    "date": "2026-10-21"
+  },
+  {
     "ticker": "PERSISTENT.NS",
     "book": "F4_DEFENSIVE",
     "sector": "IT",
     "vol_ratio": 1.23,
     "threshold": 2.0,
-    "pct_to_trigger": 61.4,
-    "prior_20d_return": 5.06,
-    "price": 5690.0,
-    "date": "2026-10-20"
-  },
-  {
-    "ticker": "MPHASIS.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "IT",
-    "vol_ratio": 1.2,
-    "threshold": 2.0,
-    "pct_to_trigger": 60.2,
-    "prior_20d_return": NaN,
-    "price": NaN,
-    "date": "2026-10-20"
+    "pct_to_trigger": 61.5,
+    "prior_20d_return": 6.06,
+    "price": 5779.0,
+    "date": "2026-10-21"
   }
 ]
