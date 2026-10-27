@@ -446,5 +446,21 @@
     "signal_strength": "NORMAL",
     "circuit_breaker": true,
     "cap_type": "mid_small"
+  },
+  {
+    "ticker": "WESTLIFE.NS",
+    "date": "2026-10-27",
+    "book": "F4_DEFENSIVE",
+    "sector": "FMCG",
+    "entry_price": 601.85,
+    "initial_stop": 552.36,
+    "target_price": 700.83,
+    "stop_pct": -8.22,
+    "vol_ratio": 3.18,
+    "prior_20d_return": 4.11,
+    "regime": "NIFTY_BEAR",
+    "signal_strength": "STRONG",
+    "circuit_breaker": true,
+    "cap_type": "mid_small"
   }
 ]
