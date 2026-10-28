@@ -1,28 +1,11 @@
 {
-  "date": "2026-10-27",
+  "date": "2026-10-28",
   "active_books": [
     "F3B_RATEHIKE",
     "F4_DEFENSIVE"
   ],
   "total_checked": 50,
-  "signal_count": 1,
-  "signals": [
-    {
-      "ticker": "WESTLIFE.NS",
-      "date": "2026-10-27",
-      "book": "F4_DEFENSIVE",
-      "sector": "FMCG",
-      "entry_price": 601.85,
-      "initial_stop": 552.36,
-      "target_price": 700.83,
-      "stop_pct": -8.22,
-      "vol_ratio": 3.18,
-      "prior_20d_return": 4.11,
-      "regime": "NIFTY_BEAR",
-      "signal_strength": "STRONG",
-      "circuit_breaker": true,
-      "cap_type": "mid_small"
-    }
-  ],
-  "generated_at": "2026-10-27T05:58:43.820343Z"
+  "signal_count": 0,
+  "signals": [],
+  "generated_at": "2026-10-28T06:36:57.221986Z"
 }
