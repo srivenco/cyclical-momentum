@@ -1,24 +1,57 @@
 [
   {
+    "ticker": "TATACONSUM.NS",
+    "book": "F3B_RATEHIKE",
+    "sector": "FMCG",
+    "vol_ratio": 1.44,
+    "threshold": 2.0,
+    "pct_to_trigger": 72.2,
+    "prior_20d_return": 5.54,
+    "price": 1013.2,
+    "date": "2026-10-29"
+  },
+  {
+    "ticker": "TATACONSUM.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "FMCG",
+    "vol_ratio": 1.44,
+    "threshold": 2.0,
+    "pct_to_trigger": 72.2,
+    "prior_20d_return": 5.54,
+    "price": 1013.2,
+    "date": "2026-10-29"
+  },
+  {
     "ticker": "PERSISTENT.NS",
     "book": "F4_DEFENSIVE",
     "sector": "IT",
-    "vol_ratio": 1.42,
+    "vol_ratio": 1.4,
     "threshold": 2.0,
-    "pct_to_trigger": 71.1,
-    "prior_20d_return": 8.26,
-    "price": 5815.5,
-    "date": "2026-10-28"
+    "pct_to_trigger": 70.2,
+    "prior_20d_return": 10.33,
+    "price": 5879.0,
+    "date": "2026-10-29"
   },
   {
     "ticker": "MPHASIS.NS",
     "book": "F4_DEFENSIVE",
     "sector": "IT",
-    "vol_ratio": 1.28,
+    "vol_ratio": 1.26,
     "threshold": 2.0,
-    "pct_to_trigger": 64.2,
-    "prior_20d_return": 11.51,
-    "price": 2495.1,
-    "date": "2026-10-28"
+    "pct_to_trigger": 63.1,
+    "prior_20d_return": 13.5,
+    "price": 2539.5,
+    "date": "2026-10-29"
+  },
+  {
+    "ticker": "TATAELXSI.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "IT",
+    "vol_ratio": 1.23,
+    "threshold": 2.0,
+    "pct_to_trigger": 61.5,
+    "prior_20d_return": 17.96,
+    "price": 3788.5,
+    "date": "2026-10-29"
   }
 ]
