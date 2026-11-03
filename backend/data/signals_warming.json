@@ -3,22 +3,55 @@
     "ticker": "TATACONSUM.NS",
     "book": "F3B_RATEHIKE",
     "sector": "FMCG",
-    "vol_ratio": 1.36,
+    "vol_ratio": 1.49,
     "threshold": 2.0,
-    "pct_to_trigger": 68.2,
-    "prior_20d_return": 7.24,
-    "price": 1026.3,
-    "date": "2026-11-02"
+    "pct_to_trigger": 74.4,
+    "prior_20d_return": 10.98,
+    "price": 1058.5,
+    "date": "2026-11-03"
   },
   {
     "ticker": "TATACONSUM.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.36,
+    "vol_ratio": 1.49,
     "threshold": 2.0,
-    "pct_to_trigger": 68.2,
-    "prior_20d_return": 7.19,
-    "price": 1025.8,
-    "date": "2026-11-02"
+    "pct_to_trigger": 74.4,
+    "prior_20d_return": 10.98,
+    "price": 1058.5,
+    "date": "2026-11-03"
+  },
+  {
+    "ticker": "MARICO.NS",
+    "book": "F3B_RATEHIKE",
+    "sector": "FMCG",
+    "vol_ratio": 1.4,
+    "threshold": 2.0,
+    "pct_to_trigger": 69.9,
+    "prior_20d_return": 8.84,
+    "price": 859.8,
+    "date": "2026-11-03"
+  },
+  {
+    "ticker": "MARICO.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "FMCG",
+    "vol_ratio": 1.4,
+    "threshold": 2.0,
+    "pct_to_trigger": 69.9,
+    "prior_20d_return": 8.86,
+    "price": 860.0,
+    "date": "2026-11-03"
+  },
+  {
+    "ticker": "CIPLA.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.32,
+    "threshold": 2.0,
+    "pct_to_trigger": 65.8,
+    "prior_20d_return": 3.65,
+    "price": 1384.2,
+    "date": "2026-11-03"
   }
 ]
