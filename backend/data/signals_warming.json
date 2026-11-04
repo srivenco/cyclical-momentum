@@ -1,57 +1,79 @@
 [
   {
-    "ticker": "TATACONSUM.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "FMCG",
-    "vol_ratio": 1.49,
-    "threshold": 2.0,
-    "pct_to_trigger": 74.4,
-    "prior_20d_return": 10.98,
-    "price": 1058.5,
-    "date": "2026-11-03"
-  },
-  {
-    "ticker": "TATACONSUM.NS",
-    "book": "F4_DEFENSIVE",
-    "sector": "FMCG",
-    "vol_ratio": 1.49,
-    "threshold": 2.0,
-    "pct_to_trigger": 74.4,
-    "prior_20d_return": 10.98,
-    "price": 1058.5,
-    "date": "2026-11-03"
-  },
-  {
     "ticker": "MARICO.NS",
     "book": "F3B_RATEHIKE",
     "sector": "FMCG",
-    "vol_ratio": 1.4,
+    "vol_ratio": 1.67,
     "threshold": 2.0,
-    "pct_to_trigger": 69.9,
-    "prior_20d_return": 8.84,
-    "price": 859.8,
-    "date": "2026-11-03"
+    "pct_to_trigger": 83.6,
+    "prior_20d_return": 12.03,
+    "price": 889.7,
+    "date": "2026-11-04"
   },
   {
     "ticker": "MARICO.NS",
     "book": "F4_DEFENSIVE",
     "sector": "FMCG",
-    "vol_ratio": 1.4,
+    "vol_ratio": 1.67,
     "threshold": 2.0,
-    "pct_to_trigger": 69.9,
-    "prior_20d_return": 8.86,
-    "price": 860.0,
-    "date": "2026-11-03"
+    "pct_to_trigger": 83.6,
+    "prior_20d_return": 12.05,
+    "price": 889.85,
+    "date": "2026-11-04"
+  },
+  {
+    "ticker": "TATACONSUM.NS",
+    "book": "F3B_RATEHIKE",
+    "sector": "FMCG",
+    "vol_ratio": 1.56,
+    "threshold": 2.0,
+    "pct_to_trigger": 77.8,
+    "prior_20d_return": 9.5,
+    "price": 1068.7,
+    "date": "2026-11-04"
+  },
+  {
+    "ticker": "TATACONSUM.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "FMCG",
+    "vol_ratio": 1.56,
+    "threshold": 2.0,
+    "pct_to_trigger": 77.8,
+    "prior_20d_return": 9.51,
+    "price": 1068.8,
+    "date": "2026-11-04"
+  },
+  {
+    "ticker": "JSWENERGY.NS",
+    "book": "F3B_RATEHIKE",
+    "sector": "ENERGY",
+    "vol_ratio": 1.43,
+    "threshold": 2.0,
+    "pct_to_trigger": 71.7,
+    "prior_20d_return": 3.07,
+    "price": 506.9,
+    "date": "2026-11-04"
   },
   {
     "ticker": "CIPLA.NS",
     "book": "F4_DEFENSIVE",
     "sector": "PHARMA",
-    "vol_ratio": 1.32,
+    "vol_ratio": 1.34,
     "threshold": 2.0,
-    "pct_to_trigger": 65.8,
-    "prior_20d_return": 3.65,
-    "price": 1384.2,
-    "date": "2026-11-03"
+    "pct_to_trigger": 67.0,
+    "prior_20d_return": 3.72,
+    "price": 1390.0,
+    "date": "2026-11-04"
+  },
+  {
+    "ticker": "LAURUSLABS.NS",
+    "book": "F4_DEFENSIVE",
+    "sector": "PHARMA",
+    "vol_ratio": 1.2,
+    "threshold": 2.0,
+    "pct_to_trigger": 60.2,
+    "prior_20d_return": 13.15,
+    "price": 2319.5,
+    "date": "2026-11-04"
   }
 ]
