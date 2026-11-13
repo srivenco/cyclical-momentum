@@ -1,68 +1,57 @@
 [
   {
+    "ticker": "MARICO.NS",
+    "book": "F3B_RATEHIKE",
+    "sector": "FMCG",
+    "vol_ratio": 1.98,
+    "threshold": 2.0,
+    "pct_to_trigger": 99.0,
+    "prior_20d_return": 14.57,
+    "price": 905.1,
+    "date": "2026-11-13"
+  },
+  {
     "ticker": "NHPC.NS",
     "book": "F3B_RATEHIKE",
     "sector": "ENERGY",
-    "vol_ratio": 1.58,
+    "vol_ratio": 1.54,
     "threshold": 2.0,
-    "pct_to_trigger": 79.2,
-    "prior_20d_return": 4.74,
-    "price": 76.97,
-    "date": "2026-11-12"
-  },
-  {
-    "ticker": "JSWENERGY.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "ENERGY",
-    "vol_ratio": 1.55,
-    "threshold": 2.0,
-    "pct_to_trigger": 77.6,
-    "prior_20d_return": 13.05,
-    "price": 520.6,
-    "date": "2026-11-12"
-  },
-  {
-    "ticker": "TATAPOWER.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "ENERGY",
-    "vol_ratio": 1.47,
-    "threshold": 2.0,
-    "pct_to_trigger": 73.5,
-    "prior_20d_return": 3.36,
-    "price": 356.6,
-    "date": "2026-11-12"
+    "pct_to_trigger": 77.2,
+    "prior_20d_return": 3.17,
+    "price": 76.06,
+    "date": "2026-11-13"
   },
   {
     "ticker": "GAIL.NS",
     "book": "F3B_RATEHIKE",
     "sector": "ENERGY",
-    "vol_ratio": 1.36,
+    "vol_ratio": 1.39,
     "threshold": 2.0,
-    "pct_to_trigger": 68.2,
-    "prior_20d_return": 11.52,
-    "price": 187.68,
-    "date": "2026-11-12"
+    "pct_to_trigger": 69.6,
+    "prior_20d_return": 12.36,
+    "price": 187.59,
+    "date": "2026-11-13"
   },
   {
     "ticker": "POWERGRID.NS",
     "book": "F3B_RATEHIKE",
     "sector": "ENERGY",
-    "vol_ratio": 1.33,
+    "vol_ratio": 1.29,
     "threshold": 2.0,
-    "pct_to_trigger": 66.4,
-    "prior_20d_return": 4.82,
-    "price": 259.55,
-    "date": "2026-11-12"
+    "pct_to_trigger": 64.3,
+    "prior_20d_return": 4.84,
+    "price": 258.0,
+    "date": "2026-11-13"
   },
   {
     "ticker": "JYOTHYLAB.NS",
     "book": "F3B_RATEHIKE",
     "sector": "FMCG",
-    "vol_ratio": 1.26,
+    "vol_ratio": 1.27,
     "threshold": 2.0,
-    "pct_to_trigger": 63.2,
-    "prior_20d_return": 6.26,
-    "price": 198.51,
-    "date": "2026-11-12"
+    "pct_to_trigger": 63.3,
+    "prior_20d_return": 5.78,
+    "price": 197.61,
+    "date": "2026-11-13"
   }
 ]
