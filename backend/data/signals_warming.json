@@ -3,55 +3,33 @@
     "ticker": "MARICO.NS",
     "book": "F3B_RATEHIKE",
     "sector": "FMCG",
-    "vol_ratio": 1.98,
+    "vol_ratio": 1.94,
     "threshold": 2.0,
-    "pct_to_trigger": 99.0,
-    "prior_20d_return": 14.57,
-    "price": 905.1,
-    "date": "2026-11-13"
-  },
-  {
-    "ticker": "NHPC.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "ENERGY",
-    "vol_ratio": 1.54,
-    "threshold": 2.0,
-    "pct_to_trigger": 77.2,
-    "prior_20d_return": 3.17,
-    "price": 76.06,
-    "date": "2026-11-13"
+    "pct_to_trigger": 97.0,
+    "prior_20d_return": 14.56,
+    "price": 903.0,
+    "date": "2026-11-16"
   },
   {
     "ticker": "GAIL.NS",
     "book": "F3B_RATEHIKE",
     "sector": "ENERGY",
-    "vol_ratio": 1.39,
+    "vol_ratio": 1.31,
     "threshold": 2.0,
-    "pct_to_trigger": 69.6,
-    "prior_20d_return": 12.36,
-    "price": 187.59,
-    "date": "2026-11-13"
+    "pct_to_trigger": 65.4,
+    "prior_20d_return": 10.68,
+    "price": 187.43,
+    "date": "2026-11-16"
   },
   {
     "ticker": "POWERGRID.NS",
     "book": "F3B_RATEHIKE",
     "sector": "ENERGY",
-    "vol_ratio": 1.29,
+    "vol_ratio": 1.21,
     "threshold": 2.0,
-    "pct_to_trigger": 64.3,
-    "prior_20d_return": 4.84,
-    "price": 258.0,
-    "date": "2026-11-13"
-  },
-  {
-    "ticker": "JYOTHYLAB.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "FMCG",
-    "vol_ratio": 1.27,
-    "threshold": 2.0,
-    "pct_to_trigger": 63.3,
-    "prior_20d_return": 5.78,
-    "price": 197.61,
-    "date": "2026-11-13"
+    "pct_to_trigger": 60.7,
+    "prior_20d_return": 5.58,
+    "price": 260.75,
+    "date": "2026-11-16"
   }
 ]
