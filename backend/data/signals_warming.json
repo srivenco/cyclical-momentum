@@ -3,33 +3,22 @@
     "ticker": "MARICO.NS",
     "book": "F3B_RATEHIKE",
     "sector": "FMCG",
-    "vol_ratio": 1.95,
+    "vol_ratio": 1.92,
     "threshold": 2.0,
-    "pct_to_trigger": 97.4,
-    "prior_20d_return": 16.83,
-    "price": 917.1,
-    "date": "2026-11-17"
+    "pct_to_trigger": 96.2,
+    "prior_20d_return": 15.6,
+    "price": 907.45,
+    "date": "2026-11-18"
   },
   {
     "ticker": "GAIL.NS",
     "book": "F3B_RATEHIKE",
     "sector": "ENERGY",
-    "vol_ratio": 1.24,
+    "vol_ratio": 1.2,
     "threshold": 2.0,
-    "pct_to_trigger": 62.0,
-    "prior_20d_return": 11.48,
-    "price": 187.39,
-    "date": "2026-11-17"
-  },
-  {
-    "ticker": "POWERGRID.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "ENERGY",
-    "vol_ratio": 1.21,
-    "threshold": 2.0,
-    "pct_to_trigger": 60.7,
-    "prior_20d_return": 4.03,
-    "price": 257.55,
-    "date": "2026-11-17"
+    "pct_to_trigger": 60.2,
+    "prior_20d_return": 12.77,
+    "price": 188.67,
+    "date": "2026-11-18"
   }
 ]
