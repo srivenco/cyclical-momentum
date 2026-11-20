@@ -1,35 +1,13 @@
 [
   {
-    "ticker": "NHPC.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "ENERGY",
-    "vol_ratio": 1.48,
-    "threshold": 2.0,
-    "pct_to_trigger": 74.0,
-    "prior_20d_return": 3.96,
-    "price": 75.53,
-    "date": "2026-11-19"
-  },
-  {
     "ticker": "IEX.NS",
     "book": "F3B_RATEHIKE",
     "sector": "ENERGY",
-    "vol_ratio": 1.33,
+    "vol_ratio": 1.36,
     "threshold": 2.0,
-    "pct_to_trigger": 66.7,
-    "prior_20d_return": 11.23,
-    "price": 114.88,
-    "date": "2026-11-19"
-  },
-  {
-    "ticker": "MARICO.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "FMCG",
-    "vol_ratio": 1.29,
-    "threshold": 2.0,
-    "pct_to_trigger": 64.7,
-    "prior_20d_return": 17.63,
-    "price": 915.2,
-    "date": "2026-11-19"
+    "pct_to_trigger": 68.1,
+    "prior_20d_return": 10.0,
+    "price": 114.4,
+    "date": "2026-11-20"
   }
 ]
