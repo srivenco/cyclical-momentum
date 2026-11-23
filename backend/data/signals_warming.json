@@ -1,13 +1,1 @@
-[
-  {
-    "ticker": "IEX.NS",
-    "book": "F3B_RATEHIKE",
-    "sector": "ENERGY",
-    "vol_ratio": 1.36,
-    "threshold": 2.0,
-    "pct_to_trigger": 68.1,
-    "prior_20d_return": 10.0,
-    "price": 114.4,
-    "date": "2026-11-20"
-  }
-]
+[]
