@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "ticker": "DABUR.NS",
+    "book": "F3B_RATEHIKE",
+    "sector": "FMCG",
+    "vol_ratio": 1.69,
+    "threshold": 2.0,
+    "pct_to_trigger": 84.3,
+    "prior_20d_return": 19.89,
+    "price": 426.8,
+    "date": "2026-11-25"
+  },
+  {
+    "ticker": "IEX.NS",
+    "book": "F3B_RATEHIKE",
+    "sector": "ENERGY",
+    "vol_ratio": 1.56,
+    "threshold": 2.0,
+    "pct_to_trigger": 78.2,
+    "prior_20d_return": 6.22,
+    "price": 109.94,
+    "date": "2026-11-25"
+  }
+]
